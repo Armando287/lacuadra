@@ -9,9 +9,8 @@ export async function getParaguayMatches() {
 
   try {
     // Liga Paraguaya ID: 252 (Primera Division)
-    // Traemos los partidos de la temporada actual (ej: 2024 o 2025)
-    const year = new Date().getFullYear();
-    const res = await fetch(`${BASE_URL}/fixtures?league=252&season=${year}&next=10`, {
+    // Usamos 2024 porque el plan gratuito no permite 2025/2026
+    const res = await fetch(`${BASE_URL}/fixtures?league=252&season=2024&last=10`, {
       headers: {
         'x-apisports-key': API_KEY
       },
@@ -21,9 +20,12 @@ export async function getParaguayMatches() {
     if (!res.ok) throw new Error("Error en API Football");
     
     const data = await res.json();
-    if (!data.response) return [];
+    if (!data.response || data.response.length === 0) return [];
 
-    return data.response.map(item => {
+    // Tomamos solo los últimos 10 para no saturar
+    const recentMatches = data.response.slice(-10);
+
+    return recentMatches.map(item => {
       const isLive = ['1H', '2H', 'HT', 'ET', 'P'].includes(item.fixture.status.short);
       const isFinished = ['FT', 'AET', 'PEN'].includes(item.fixture.status.short);
       
