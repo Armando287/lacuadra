@@ -9,7 +9,7 @@ export default function Navbar() {
 
   return (
     <header className={styles.header}>
-      <nav className={`glass-pill ${styles.navbar}`}>
+      <nav className={styles.navbar}>
         <div className={styles.logo}>
           <Link href="/">
             <span className={styles.logoText}>La Cuadra</span>

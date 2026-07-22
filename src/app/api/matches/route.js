@@ -17,11 +17,10 @@ export async function GET() {
       return NextResponse.json({ matches });
     }
   } catch (e) {
-    // Silently fallback to mock if API/Supabase fails
+    console.error(e);
   }
 
-  // 3. Fallback a JSON DB (Mock)
-  const db = readDB();
-  return NextResponse.json({ matches: db.matches });
+  // Fallback seguro: devolver array vacío para no mostrar partidos inventados
+  return NextResponse.json({ matches: [] });
 }
 

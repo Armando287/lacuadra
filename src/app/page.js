@@ -31,7 +31,7 @@ export default function Home() {
 
       {/* Central Immersive Hero */}
       <div className={styles.heroCenter}>
-        <div className={styles.badge}>Nueva Temporada 2024</div>
+        <div className={styles.badge}>Nueva Temporada {new Date().getFullYear()}</div>
         <h1 className={styles.massiveTitle}>
           LA <span className={styles.highlight}>CUADRA</span>
         </h1>
@@ -69,11 +69,13 @@ export default function Home() {
               <div key={idx} className={styles.tickerItem}>
                 <span className={styles.tickerTournament}>{match.tournament}</span>
                 <span className={styles.tickerTeams}>
+                  {match.homeLogo && <img src={match.homeLogo} alt={match.homeTeam} className={styles.tickerLogo} />}
                   {match.homeTeam} 
                   <span className={styles.tickerScore}>
                     {match.scoreHome !== null ? `${match.scoreHome} - ${match.scoreAway}` : 'vs'}
                   </span> 
                   {match.awayTeam}
+                  {match.awayLogo && <img src={match.awayLogo} alt={match.awayTeam} className={styles.tickerLogo} />}
                 </span>
                 {match.status === 'live' && <span className="status-dot live"></span>}
               </div>

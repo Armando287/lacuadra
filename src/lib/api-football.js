@@ -9,8 +9,8 @@ export async function getParaguayMatches() {
 
   try {
     // Liga Paraguaya ID: 252 (Primera Division)
-    // Usamos 2024 porque el plan gratuito no permite 2025/2026
-    const res = await fetch(`${BASE_URL}/fixtures?league=252&season=2024&last=10`, {
+    // La API gratuita solo permite hasta 2024. Al estar en 2026, esto cumple con "mostrar hasta 2 años atrás".
+    const res = await fetch(`${BASE_URL}/fixtures?league=252&season=2024`, {
       headers: {
         'x-apisports-key': API_KEY
       },
@@ -22,8 +22,8 @@ export async function getParaguayMatches() {
     const data = await res.json();
     if (!data.response || data.response.length === 0) return [];
 
-    // Tomamos solo los últimos 10 para no saturar
-    const recentMatches = data.response.slice(-10);
+    // Tomamos solo los últimos 15 partidos más recientes para no saturar la UI
+    const recentMatches = data.response.slice(-15);
 
     return recentMatches.map(item => {
       const isLive = ['1H', '2H', 'HT', 'ET', 'P'].includes(item.fixture.status.short);
@@ -33,13 +33,15 @@ export async function getParaguayMatches() {
         id: item.fixture.id.toString(),
         homeTeam: item.teams.home.name,
         awayTeam: item.teams.away.name,
+        homeLogo: item.teams.home.logo,
+        awayLogo: item.teams.away.logo,
         tournament: item.league.name,
         date: item.fixture.date,
         status: isLive ? 'live' : isFinished ? 'finished' : 'upcoming',
         scoreHome: item.goals.home,
         scoreAway: item.goals.away,
         stadium: item.fixture.venue.name,
-        events: [], // En una versión más avanzada se hace un fetch a /fixtures/events
+        events: [],
         lineupHome: [],
         lineupAway: []
       };

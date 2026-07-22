@@ -14,42 +14,54 @@ export default function Leaderboard() {
 
   return (
     <main className={styles.main}>
-      <h1 className={styles.title}>🏆 Ranking Oficial</h1>
-      <p className={styles.subtitle}>Los mejores pronosticadores de La Cuadra.</p>
+      <h1 className={styles.title}>Ranking Oficial</h1>
+      <p className={styles.subtitle}>Los mejores pronosticadores de la temporada.</p>
 
-      <div className={`glass-panel ${styles.tableContainer}`}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Posición</th>
-              <th>Usuario</th>
-              <th>Puntos</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user, index) => (
-              <tr key={user.id} className={index < 2 ? styles.topRow : ''}>
-                <td>
-                  <span className={`${styles.position} ${index === 0 ? styles.gold : index === 1 ? styles.silver : ''}`}>
+      <div className={styles.tableContainer}>
+        <div className={styles.list}>
+          {users.map((user, index) => {
+            let positionClass = '';
+            let badgeClass = '';
+            let badgeText = '';
+
+            if (index === 0) {
+              positionClass = styles.gold;
+              badgeClass = styles.goldBadge;
+              badgeText = 'Campeón';
+            } else if (index === 1) {
+              positionClass = styles.silver;
+              badgeClass = styles.silverBadge;
+              badgeText = 'Plata';
+            } else if (index === 2) {
+              positionClass = styles.bronze;
+              badgeClass = styles.bronzeBadge;
+              badgeText = 'Bronce';
+            }
+
+            return (
+              <div key={user.id} className={`${styles.row} ${index < 3 ? styles.topRow : ''}`}>
+                <div className={styles.leftCol}>
+                  <span className={`${styles.position} ${positionClass}`}>
                     {index + 1}
                   </span>
-                </td>
-                <td>
                   <div className={styles.userCell}>
                     <img src={user.avatarUrl} alt={user.username} className={styles.avatar} />
-                    <span>{user.username}</span>
+                    <span className={styles.username}>{user.username}</span>
                   </div>
-                </td>
-                <td className={styles.points}>{user.points}</td>
-                <td>
-                  {index === 0 && <span className={styles.badge}>🏆 Campeón</span>}
-                  {index === 1 && <span className={styles.badge}>🥈 Subcampeón</span>}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+                
+                <div className={styles.rightCol}>
+                  {badgeText && (
+                    <span className={`${styles.badge} ${badgeClass}`}>
+                      {badgeText}
+                    </span>
+                  )}
+                  <span className={styles.points}>{user.points} pts</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </main>
   );

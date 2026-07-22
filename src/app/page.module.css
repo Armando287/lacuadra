@@ -178,6 +178,13 @@
   margin: 0 8px;
 }
 
+.tickerLogo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  margin: 0 6px;
+}
+
 /* Animations */
 @keyframes scaleIn {
   from { transform: scale(0.9); opacity: 0; }
