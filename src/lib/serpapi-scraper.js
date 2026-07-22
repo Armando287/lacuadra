@@ -16,67 +16,112 @@ export async function fetchFromSerpApi(query) {
   return response.json();
 }
 
+function parseGoogleDate(dateStr, timeStr) {
+  // Ej: dateStr = "Sáb, 25/7", timeStr = "4:00 p. m."
+  try {
+    if (!dateStr) return new Date().toISOString();
+    const parts = dateStr.split(' ');
+    const dayMonth = parts[parts.length - 1]; // "25/7"
+    const [day, month] = dayMonth.split('/');
+    const year = new Date().getFullYear();
+    let d = new Date(year, parseInt(month) - 1, parseInt(day));
+    
+    // Parse time if present (basic)
+    if (timeStr) {
+      const isPm = timeStr.includes('p');
+      const timeParts = timeStr.replace(/[^0-9:]/g, '').split(':');
+      let hour = parseInt(timeParts[0]);
+      const min = timeParts.length > 1 ? parseInt(timeParts[1]) : 0;
+      if (isPm && hour < 12) hour += 12;
+      if (!isPm && hour === 12) hour = 0;
+      d.setHours(hour, min, 0, 0);
+    }
+    return d.toISOString();
+  } catch (e) {
+    return new Date().toISOString();
+  }
+}
+
 export async function getGoogleMatches() {
-  const data = await fetchFromSerpApi("Liga Paraguaya partidos");
+  const data = await fetchFromSerpApi("Primera División de Paraguay partidos");
   
-  // Si no hay API key o hay error, usamos un respaldo idéntico al formato que devuelve SerpApi
   if (!data || !data.sports_results || !data.sports_results.games) {
     return getFallbackMatches();
   }
 
+  // Extraemos logos de la tabla de posiciones que viene incluida a veces, o de otra query
+  const logoMap = {};
+  if (data.sports_results.league && data.sports_results.league.standings) {
+    data.sports_results.league.standings.forEach(s => {
+      logoMap[s.team.name] = s.team.thumbnail;
+    });
+  }
+  if (data.sports_results.other_leagues) {
+    data.sports_results.other_leagues.forEach(league => {
+      league.standings.forEach(s => {
+        logoMap[s.team.name] = s.team.thumbnail;
+      });
+    });
+  }
+
   const games = data.sports_results.games;
   return games.map((game, index) => {
-    // SerpApi retorna los equipos bajo teams
     const homeTeam = game.teams[0];
     const awayTeam = game.teams[1];
     
-    // Status can be "Finalizado", "En juego", "Mañana", etc.
     let status = 'upcoming';
     if (game.status === 'Finalizado' || game.status === 'FT') status = 'finished';
     if (game.status === 'En juego' || game.status === 'En vivo') status = 'live';
 
     return {
-      id: `google_${index}_${game.tournament || 'liga'}`,
+      id: `google_${index}_${game.kgmid || game.tournament}`,
       homeTeam: homeTeam.name,
       awayTeam: awayTeam.name,
-      tournament: data.sports_results.title || "Primera División",
-      round: game.tournament || "Fecha Regular",
-      date: game.date || new Date().toISOString(),
+      tournament: game.tournament || data.sports_results.title || "Primera División",
+      round: game.stage || "Fecha Regular",
+      date: parseGoogleDate(game.date, game.time),
       status: status,
       scoreHome: homeTeam.score ? parseInt(homeTeam.score) : null,
       scoreAway: awayTeam.score ? parseInt(awayTeam.score) : null,
-      homeLogo: homeTeam.thumbnail,
-      awayLogo: awayTeam.thumbnail,
-      stadium: game.stadium || "Estadio Local"
+      homeLogo: logoMap[homeTeam.name] || homeTeam.thumbnail || "",
+      awayLogo: logoMap[awayTeam.name] || awayTeam.thumbnail || "",
+      stadium: game.lugar || "Estadio Local"
     };
   });
 }
 
 export async function getGoogleStandings() {
-  const data = await fetchFromSerpApi("Liga Paraguaya posiciones");
+  const data = await fetchFromSerpApi("Primera División de Paraguay posiciones");
   
-  if (!data || !data.sports_results || !data.sports_results.standings) {
+  if (!data || !data.sports_results || !data.sports_results.league) {
     return getFallbackStandings();
   }
 
-  // Google/SerpApi retorna standings de esta forma:
-  const standings = data.sports_results.standings.map((team, idx) => ({
+  // Tratamos de obtener standings del Clausura si existe en other_leagues, o usamos league
+  let standingsArray = [];
+  if (data.sports_results.other_leagues && data.sports_results.other_leagues.length > 0) {
+    const clausura = data.sports_results.other_leagues.find(l => l.name === "Clausura");
+    if (clausura) standingsArray = clausura.standings;
+  }
+  if (standingsArray.length === 0 && data.sports_results.league.standings) {
+    standingsArray = data.sports_results.league.standings;
+  }
+
+  const standings = standingsArray.map((team, idx) => ({
     equipo: team.team.name,
     logo: team.team.thumbnail,
-    puntos: team.pts,
-    partidos: team.played,
-    victorias: team.won,
-    empates: team.drawn,
-    derrotas: team.lost,
-    golesFavor: team.goals_for,
-    golesContra: team.goals_against,
-    diferenciaGoles: team.goal_difference,
-    promedio: team.pts / team.played || 0 // Calculamos promedio
+    puntos: parseInt(team.pts || 0),
+    partidos: parseInt(team.pj || team.played || 0),
+    victorias: parseInt(team.g || team.won || 0),
+    empates: parseInt(team.e || team.drawn || 0),
+    derrotas: parseInt(team.p || team.lost || 0),
+    golesFavor: parseInt(team.gf || team.goals_for || 0),
+    golesContra: parseInt(team.gc || team.goals_against || 0),
+    diferenciaGoles: parseInt(team.dg || team.goal_difference || 0),
+    promedio: parseInt(team.pts) / parseInt(team.pj || 1) || 0
   }));
 
-  // Generamos goleadores simulados porque Google no siempre da tabla de goleadores estructurada
   const { goleadores, asistencias } = getFallbackStats();
-
   return { promedios: standings, goleadores, asistencias };
 }
 

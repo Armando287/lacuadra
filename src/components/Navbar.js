@@ -22,9 +22,6 @@ export default function Navbar() {
           <Link href="/leaderboard" className={`${styles.link} ${pathname === '/leaderboard' ? styles.active : ''}`}>
             Ranking
           </Link>
-          <Link href="/stats" className={`${styles.link} ${pathname === '/stats' ? styles.active : ''}`}>
-            Estadísticas
-          </Link>
           <Link href="/rules" className={`${styles.link} ${pathname === '/rules' ? styles.active : ''}`}>
             Reglas
           </Link>
