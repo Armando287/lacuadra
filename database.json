@@ -5,14 +5,16 @@
       "username": "demo",
       "password": "123",
       "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-      "points": 15
+      "points": 15,
+      "favoriteClub": "Olimpia"
     },
     {
       "id": "2",
       "username": "juan_py",
       "password": "123",
       "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Juan",
-      "points": 10
+      "points": 10,
+      "favoriteClub": "Cerro Porteño"
     }
   ],
   "matches": [

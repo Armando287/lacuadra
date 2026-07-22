@@ -22,6 +22,9 @@ export default function Navbar() {
           <Link href="/leaderboard" className={pathname === '/leaderboard' ? styles.active : ''}>
             Ranking
           </Link>
+          <Link href="/rules" className={pathname === '/rules' ? styles.active : ''}>
+            Reglas
+          </Link>
           <Link href="/login" className="btn-primary">
             Login
           </Link>

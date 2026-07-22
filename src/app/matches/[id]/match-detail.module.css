@@ -82,6 +82,23 @@
   animation: pulse 1.5s infinite;
 }
 
+.logoImg {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.lockedVote {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  padding: 2rem;
+  border-radius: var(--radius-md);
+  text-align: center;
+  color: var(--secondary-color);
+  font-weight: 600;
+  margin-top: 1.5rem;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr;

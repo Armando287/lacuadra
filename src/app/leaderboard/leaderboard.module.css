@@ -154,8 +154,101 @@
   border: 1px solid rgba(180, 83, 9, 0.3);
 }
 
+/* Tabs and new UI */
+.tabsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.tabBtn {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--text-muted);
+  font-family: var(--font-main);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  transition: var(--transition);
+}
+
+.tabBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.activeTab {
+  background: var(--primary-color);
+  color: var(--bg-dark);
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 15px rgba(0, 245, 118, 0.3);
+}
+
+.roundSelector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.roundSelector label {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.roundSelector select {
+  padding: 0.5rem 1rem;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.statsCol {
+  display: flex;
+  gap: 2rem;
+  opacity: 0.8;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statItem span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--secondary-color);
+}
+
+.statItem strong {
+  font-size: 1.25rem;
+  color: var(--text-light);
+}
+
+.clubName {
+  font-size: 0.85rem;
+  color: var(--secondary-color);
+  margin-top: 0.2rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
 /* Mobile Adjustments */
-@media (max-width: 600px) {
+@media (max-width: 800px) {
   .row {
     flex-direction: column;
     align-items: flex-start;
@@ -164,5 +257,12 @@
   .rightCol {
     width: 100%;
     justify-content: space-between;
+  }
+  .statsCol {
+    width: 100%;
+    justify-content: space-around;
+    padding: 1rem 0;
+    border-top: 1px dashed rgba(255,255,255,0.1);
+    border-bottom: 1px dashed rgba(255,255,255,0.1);
   }
 }

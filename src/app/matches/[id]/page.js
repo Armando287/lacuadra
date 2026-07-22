@@ -10,8 +10,18 @@ export default function MatchDetail() {
   const [voteHome, setVoteHome] = useState('');
   const [voteAway, setVoteAway] = useState('');
   const [message, setMessage] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isActiveRound, setIsActiveRound] = useState(false);
 
   useEffect(() => {
+    // Basic auth check
+    const token = localStorage.getItem('user_token');
+    if (token) setIsLoggedIn(true);
+
+    // Read active round flag from URL
+    const searchParams = new URLSearchParams(window.location.search);
+    setIsActiveRound(searchParams.get('active') === 'true');
+
     fetch('/api/matches')
       .then(res => res.json())
       .then(data => {
@@ -22,7 +32,18 @@ export default function MatchDetail() {
 
   const handleVote = async (e) => {
     e.preventDefault();
-    const userId = "1"; // Mocked logged in user for demo
+    if (!isLoggedIn) {
+      setMessage('Debes iniciar sesión para votar.');
+      return;
+    }
+    
+    if (match.status !== 'upcoming') {
+      setMessage('El partido ya comenzó o ha finalizado. No se permiten más votos.');
+      return;
+    }
+
+    // Get real user id
+    const userId = localStorage.getItem('user_token') || "1";
     
     const res = await fetch('/api/votes', {
       method: 'POST',
@@ -49,12 +70,14 @@ export default function MatchDetail() {
     <main className={styles.main}>
       <div className={`glass-panel ${styles.scoreboard}`}>
         <div className={styles.headerInfo}>
-          <span>{match.tournament}</span>
+          <span>{match.tournament} - {match.round}</span>
           <span>{new Date(match.date).toLocaleString()}</span>
         </div>
         <div className={styles.teams}>
           <div className={styles.team}>
-            <div className={styles.logoLg}></div>
+            <div className={styles.logoLg}>
+              {match.homeLogo && <img src={match.homeLogo} alt={match.homeTeam} className={styles.logoImg} />}
+            </div>
             <h2>{match.homeTeam}</h2>
           </div>
           <div className={styles.scoreContainer}>
@@ -67,7 +90,9 @@ export default function MatchDetail() {
             </div>
           </div>
           <div className={styles.team}>
-            <div className={styles.logoLg}></div>
+            <div className={styles.logoLg}>
+               {match.awayLogo && <img src={match.awayLogo} alt={match.awayTeam} className={styles.logoImg} />}
+            </div>
             <h2>{match.awayTeam}</h2>
           </div>
         </div>
@@ -79,33 +104,44 @@ export default function MatchDetail() {
             <h3 className={styles.panelTitle}>Predicción (La Polla)</h3>
             <p>Vota por el resultado exacto. Tienes hasta 1 hora antes del partido.</p>
             
-            <form onSubmit={handleVote} className={styles.voteForm}>
-              <div className={styles.voteInputs}>
-                <div className={styles.inputGroup}>
-                  <label>{match.homeTeam}</label>
-                  <input 
-                    type="number" 
-                    min="0" 
-                    required 
-                    value={voteHome} 
-                    onChange={e => setVoteHome(e.target.value)}
-                  />
-                </div>
-                <span>-</span>
-                <div className={styles.inputGroup}>
-                  <label>{match.awayTeam}</label>
-                  <input 
-                    type="number" 
-                    min="0" 
-                    required 
-                    value={voteAway} 
-                    onChange={e => setVoteAway(e.target.value)}
-                  />
-                </div>
+            {!isLoggedIn ? (
+              <div className={styles.lockedVote}>
+                <p>🔒 Inicia sesión para guardar tu predicción.</p>
+                <a href="/login" className="btn-primary" style={{display: 'inline-block', marginTop: '1rem'}}>Ir a Login</a>
               </div>
-              <button type="submit" className="btn-primary">Guardar Predicción</button>
-              {message && <div className={styles.message}>{message}</div>}
-            </form>
+            ) : match.status !== 'upcoming' ? (
+              <div className={styles.lockedVote}>
+                <p>🔒 El partido ya comenzó o finalizó. La votación está cerrada.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleVote} className={styles.voteForm}>
+                <div className={styles.voteInputs}>
+                  <div className={styles.inputGroup}>
+                    <label>{match.homeTeam}</label>
+                    <input 
+                      type="number" 
+                      min="0" 
+                      required 
+                      value={voteHome} 
+                      onChange={e => setVoteHome(e.target.value)}
+                    />
+                  </div>
+                  <span>-</span>
+                  <div className={styles.inputGroup}>
+                    <label>{match.awayTeam}</label>
+                    <input 
+                      type="number" 
+                      min="0" 
+                      required 
+                      value={voteAway} 
+                      onChange={e => setVoteAway(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <button type="submit" className="btn-primary">Guardar Predicción</button>
+                {message && <div className={styles.message}>{message}</div>}
+              </form>
+            )}
           </div>
 
           <div className={`glass-panel ${styles.pitchPanel}`}>

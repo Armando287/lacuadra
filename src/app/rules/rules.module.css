@@ -1,0 +1,146 @@
+.main {
+  min-height: 100vh;
+  padding: 8rem 2rem 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.title {
+  text-align: center;
+  font-size: 3.5rem;
+  font-family: var(--font-display);
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 20px rgba(0, 245, 118, 0.2);
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--secondary-color);
+  margin-bottom: 4rem;
+  font-size: 1.1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.ruleSection {
+  padding: 2.5rem;
+  border-radius: var(--radius-xl);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.ruleSection h2 {
+  color: var(--text-light);
+  margin-bottom: 1rem;
+  font-family: var(--font-display);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1rem;
+}
+
+.pointCard {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+}
+
+.pointBadge {
+  background: rgba(0, 245, 118, 0.15);
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 900;
+  padding: 1rem;
+  border-radius: 50%;
+  min-width: 70px;
+  text-align: center;
+  border: 1px solid rgba(0, 245, 118, 0.3);
+}
+
+.zero {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.pointContent h3 {
+  color: var(--text-light);
+  margin-bottom: 0.25rem;
+}
+
+.pointContent p {
+  color: var(--text-main);
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.pointContent small {
+  color: var(--secondary-color);
+  font-style: italic;
+}
+
+.infoBox {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(251, 191, 36, 0.1);
+  border-left: 4px solid #fbbf24;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.icon {
+  font-size: 1.5rem;
+}
+
+.list {
+  padding-left: 1.5rem;
+  color: var(--text-main);
+}
+
+.list li {
+  margin-bottom: 0.75rem;
+}
+
+.highlightList {
+  background: rgba(0, 245, 118, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-light);
+  margin-top: 1rem;
+}
+
+.championBox {
+  display: flex;
+  gap: 2rem;
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  font-size: 1.2rem;
+  color: var(--text-light);
+}
+
+.smallNote {
+  font-size: 0.85rem;
+  color: var(--secondary-color);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
