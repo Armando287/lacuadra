@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readDB } from '@/lib/db';
-import { getParaguayMatches } from '@/lib/api-football';
+import { getGoogleMatches } from '@/lib/serpapi-scraper';
 import { calculateMatchPoints } from '@/lib/scoring';
 
 export async function GET(request) {
@@ -14,7 +14,7 @@ export async function GET(request) {
     const votes = db.votes;
     
     // Fetch real matches to evaluate votes
-    const matches = await getParaguayMatches(targetYear);
+    const matches = await getGoogleMatches();
     
     // Evaluate points for each vote
     const evaluatedVotes = votes.map(vote => {

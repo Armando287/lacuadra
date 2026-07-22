@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getSofascoreMatches } from '@/lib/sofascore-scraper';
+import { getGoogleMatches } from '@/lib/serpapi-scraper';
 
 export async function GET(request) {
   try {
@@ -8,8 +8,8 @@ export async function GET(request) {
     const yearParam = searchParams.get('year');
     const targetYear = yearParam ? parseInt(yearParam) : new Date().getFullYear();
 
-    // 1. Obtener datos desde el nuevo scraper (Sofascore)
-    const apiMatches = await getSofascoreMatches();
+    // 1. Obtener datos desde Google Sports (SerpApi)
+    const apiMatches = await getGoogleMatches();
     if (apiMatches && apiMatches.length > 0) {
       return NextResponse.json({ matches: apiMatches });
     }

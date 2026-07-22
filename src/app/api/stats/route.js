@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getSofascoreStats } from '@/lib/sofascore-scraper';
+import { getGoogleStandings } from '@/lib/serpapi-scraper';
 
 export async function GET(request) {
   try {
-    const stats = await getSofascoreStats();
+    const stats = await getGoogleStandings();
     return NextResponse.json(stats);
   } catch (error) {
     console.error('Error in /api/stats:', error);
