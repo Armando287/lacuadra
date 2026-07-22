@@ -1,0 +1,116 @@
+.main {
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.title {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  text-shadow: 0 0 10px rgba(69, 162, 158, 0.3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.card {
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 40px rgba(69, 162, 158, 0.2);
+  border-color: var(--primary-color);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.tournament {
+  color: var(--accent-gold);
+}
+
+.status {
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.live {
+  background: rgba(255, 0, 0, 0.2);
+  color: #ff4d4d;
+  animation: pulse 1.5s infinite;
+}
+
+.upcoming {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+.finished {
+  background: rgba(69, 162, 158, 0.2);
+  color: var(--primary-color);
+}
+
+.teams {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  background: var(--surface-color);
+  border-radius: 50%;
+  border: 2px solid var(--surface-border);
+}
+
+.score {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  padding: 0 1rem;
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-main);
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}

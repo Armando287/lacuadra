@@ -1,0 +1,40 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  margin: 1rem auto;
+  max-width: 1200px;
+  position: sticky;
+  top: 1rem;
+  z-index: 100;
+  border-radius: 50px; /* pill shape */
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  letter-spacing: -0.5px;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.links a {
+  font-weight: 600;
+  color: var(--text-main);
+  transition: var(--transition);
+}
+
+.links a:hover {
+  color: var(--primary-hover);
+}
+
+.active {
+  color: var(--primary-color) !important;
+  text-shadow: 0 0 8px rgba(69, 162, 158, 0.4);
+}

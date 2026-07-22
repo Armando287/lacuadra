@@ -1,0 +1,88 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "demo",
+      "password": "123",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+      "points": 15
+    },
+    {
+      "id": "2",
+      "username": "juan_py",
+      "password": "123",
+      "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Juan",
+      "points": 10
+    }
+  ],
+  "matches": [
+    {
+      "id": "m1",
+      "homeTeam": "Cerro Porteño",
+      "awayTeam": "Olimpia",
+      "tournament": "Clausura",
+      "date": "2026-07-23T20:00:00Z",
+      "status": "upcoming",
+      "scoreHome": null,
+      "scoreAway": null,
+      "events": [],
+      "lineupHome": ["Jean Fernandes", "Alan Benítez", "Javier Báez", "Eduardo Brock", "Santiago Arzamendia", "Piris da Motta", "Damián Bobadilla", "Federico Carrizo", "Claudio Aquino", "Diego Churín", "Alfio Oviedo"],
+      "lineupAway": ["Gastón Olveira", "Víctor Salazar", "Jhohan Romaña", "Mateo Gamarra", "Facundo Zabala", "Alejandro Silva", "Marcos Gómez", "Richard Ortiz", "Iván Torres", "Hugo Fernández", "Guillermo Paiva"],
+      "stadium": "La Nueva Olla"
+    },
+    {
+      "id": "m2",
+      "homeTeam": "Libertad",
+      "awayTeam": "Guaraní",
+      "tournament": "Copa Paraguay",
+      "date": "2026-07-22T19:00:00Z",
+      "status": "live",
+      "scoreHome": 1,
+      "scoreAway": 0,
+      "events": [
+        {"time": "15'", "type": "goal", "team": "Libertad", "player": "Óscar Cardozo"},
+        {"time": "30'", "type": "yellow_card", "team": "Guaraní", "player": "Federico Santander"}
+      ],
+      "lineupHome": ["Martín Silva", "Iván Piris", "Diego Viera", "Alexander Barboza", "Matías Espinoza", "Hernesto Caballero", "Álvaro Campuzano", "Lucas Sanabria", "Héctor Villalba", "Óscar Cardozo", "Lorenzo Melgarejo"],
+      "lineupAway": ["Rodrigo Muñoz", "Raúl Cáceres", "José Moya", "Paul Riveros", "Felipe Salomoni", "Gastón Gil Romero", "Rubén Ríos", "Romeo Benítez", "Néstor Camacho", "Federico Santander", "Facundo Barceló"],
+      "stadium": "Tigo La Huerta"
+    },
+    {
+      "id": "m3",
+      "homeTeam": "Nacional",
+      "awayTeam": "Sportivo Luqueño",
+      "tournament": "Apertura",
+      "date": "2026-07-21T18:00:00Z",
+      "status": "finished",
+      "scoreHome": 2,
+      "scoreAway": 2,
+      "events": [
+        {"time": "10'", "type": "goal", "team": "Nacional", "player": "Cristhian Ocampos"},
+        {"time": "45'", "type": "goal", "team": "Sportivo Luqueño", "player": "Marcelo Pérez"},
+        {"time": "60'", "type": "goal", "team": "Nacional", "player": "David Fleitas"},
+        {"time": "89'", "type": "goal", "team": "Sportivo Luqueño", "player": "Paul Charpentier"}
+      ],
+      "lineupHome": [],
+      "lineupAway": [],
+      "stadium": "Arsenio Erico"
+    }
+  ],
+  "votes": [
+    {
+      "id": "v1",
+      "userId": "1",
+      "matchId": "m1",
+      "predictedScoreHome": 2,
+      "predictedScoreAway": 1,
+      "pointsEarned": null
+    },
+    {
+      "id": "v2",
+      "userId": "1",
+      "matchId": "m3",
+      "predictedScoreHome": 2,
+      "predictedScoreAway": 2,
+      "pointsEarned": 3
+    }
+  ]
+}
