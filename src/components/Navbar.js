@@ -16,13 +16,16 @@ export default function Navbar() {
           </Link>
         </div>
         <div className={styles.links}>
-          <Link href="/matches" className={pathname === '/matches' ? styles.active : ''}>
+          <Link href="/matches" className={`${styles.link} ${pathname === '/matches' ? styles.active : ''}`}>
             Partidos
           </Link>
-          <Link href="/leaderboard" className={pathname === '/leaderboard' ? styles.active : ''}>
+          <Link href="/leaderboard" className={`${styles.link} ${pathname === '/leaderboard' ? styles.active : ''}`}>
             Ranking
           </Link>
-          <Link href="/rules" className={pathname === '/rules' ? styles.active : ''}>
+          <Link href="/stats" className={`${styles.link} ${pathname === '/stats' ? styles.active : ''}`}>
+            Estadísticas
+          </Link>
+          <Link href="/rules" className={`${styles.link} ${pathname === '/rules' ? styles.active : ''}`}>
             Reglas
           </Link>
           <Link href="/login" className="btn-primary">

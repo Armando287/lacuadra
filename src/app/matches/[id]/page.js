@@ -109,6 +109,10 @@ export default function MatchDetail() {
                 <p>🔒 Inicia sesión para guardar tu predicción.</p>
                 <a href="/login" className="btn-primary" style={{display: 'inline-block', marginTop: '1rem'}}>Ir a Login</a>
               </div>
+            ) : !isActiveRound ? (
+              <div className={styles.lockedVote}>
+                <p>🔒 Sólo puedes votar en partidos de la fecha actual en juego.</p>
+              </div>
             ) : match.status !== 'upcoming' ? (
               <div className={styles.lockedVote}>
                 <p>🔒 El partido ya comenzó o finalizó. La votación está cerrada.</p>

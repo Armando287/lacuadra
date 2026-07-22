@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { readDB } from '@/lib/db';
-import { getParaguayMatches } from '@/lib/api-football';
+import { getSofascoreMatches } from '@/lib/sofascore-scraper';
 
 export async function GET(request) {
   try {
@@ -9,8 +8,8 @@ export async function GET(request) {
     const yearParam = searchParams.get('year');
     const targetYear = yearParam ? parseInt(yearParam) : new Date().getFullYear();
 
-    // 1. Intentar API-Football (Live) con el año solicitado
-    const apiMatches = await getParaguayMatches(targetYear);
+    // 1. Obtener datos desde el nuevo scraper (Sofascore)
+    const apiMatches = await getSofascoreMatches();
     if (apiMatches && apiMatches.length > 0) {
       return NextResponse.json({ matches: apiMatches });
     }

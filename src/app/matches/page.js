@@ -54,9 +54,9 @@ export default function MatchesPage() {
   }, [selectedTournament, matches]);
 
   // Derived filtered matches
-  const filteredMatches = matches.filter(m => 
-    m.tournament === selectedTournament && m.round === selectedRound
-  );
+  const filteredMatches = matches
+    .filter(m => m.tournament === selectedTournament && m.round === selectedRound)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 
   // Check if the selected round is the active round
   const [activeRound, setActiveRound] = useState('');

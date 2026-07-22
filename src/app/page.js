@@ -18,17 +18,21 @@ export default function Home() {
           const activeTournaments = [...new Set(data.matches.filter(m => m.status === 'live' || m.status === 'upcoming').map(m => m.tournament))];
           
           let filtered = [];
-          if (activeTournaments.length > 0) {
-            const activeTournament = activeTournaments[0];
-            const tMatches = data.matches.filter(m => m.tournament === activeTournament);
-            
+          // Si hay torneo activo, usarlo. Si no, tomar el último torneo disponible
+          const targetTournament = activeTournaments.length > 0 
+            ? activeTournaments[0] 
+            : [...new Set(data.matches.map(m => m.tournament))].pop();
+
+          if (targetTournament) {
+            const tMatches = data.matches.filter(m => m.tournament === targetTournament).sort((a, b) => new Date(a.date) - new Date(b.date));
             const rounds = [...new Set(tMatches.map(m => m.round))];
-            const firstActiveMatch = tMatches.find(m => m.status === 'live' || m.status === 'upcoming');
             
-            if (firstActiveMatch) {
-              const currentRound = firstActiveMatch.round;
+            // Buscar la primera jornada activa o, si no hay, tomar la última jornada
+            const firstActiveMatch = tMatches.find(m => m.status === 'live' || m.status === 'upcoming');
+            const currentRound = firstActiveMatch ? firstActiveMatch.round : rounds[rounds.length - 1];
+            
+            if (currentRound) {
               const currentIndex = rounds.indexOf(currentRound);
-              
               const roundsToShow = [currentRound];
               if (currentIndex > 0) roundsToShow.unshift(rounds[currentIndex - 1]); // Agregar la fecha anterior
               
