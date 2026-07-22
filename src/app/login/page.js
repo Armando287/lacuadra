@@ -29,15 +29,15 @@ export default function Login() {
 
   return (
     <main className={styles.main}>
-      <div className={`glass-panel ${styles.loginCard}`}>
-        <h2 className={styles.title}>Ingresar a La Cuadra</h2>
-        <p className={styles.subtitle}>Ingresa tus datos o regístrate automáticamente.</p>
+      <div className={`glass-panel ${styles.loginContainer}`}>
+        <h2 className={styles.title}>La Cuadra</h2>
         
         <form onSubmit={handleLogin} className={styles.form}>
           <div className={styles.inputGroup}>
             <label>Usuario</label>
             <input 
               type="text" 
+              className={styles.input}
               value={username} 
               onChange={e => setUsername(e.target.value)} 
               required 
@@ -47,13 +47,14 @@ export default function Login() {
             <label>Contraseña</label>
             <input 
               type="password" 
+              className={styles.input}
               value={password} 
               onChange={e => setPassword(e.target.value)} 
               required 
             />
           </div>
           {error && <div className={styles.error}>{error}</div>}
-          <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
+          <button type="submit" className={`btn-primary ${styles.submitBtn}`}>
             Entrar / Registrarse
           </button>
         </form>

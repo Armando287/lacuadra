@@ -21,13 +21,13 @@ export default function Home() {
           </h1>
           <p className={styles.subtitle}>
             La polla definitiva para los torneos paraguayos. 
-            Copa Paraguay, Apertura y Clausura.
+            Copa Paraguay, Apertura y Clausura. Únete y demuestra que sabes de fútbol.
           </p>
           <div className={styles.ctaContainer}>
             <a href="/login" className="btn-primary">
               Iniciar Sesión / Registro
             </a>
-            <a href="/matches" className={styles.btnSecondary}>
+            <a href="/matches" className="btn-secondary">
               Ver Partidos
             </a>
           </div>
@@ -43,16 +43,16 @@ export default function Home() {
       
       <div className={styles.featuresSection}>
         <div className={`glass-panel ${styles.featureCard}`}>
-          <h3>🏆 Torneos Oficiales</h3>
-          <p>Apertura, Clausura y Copa Paraguay.</p>
+          <h3><span>🏆</span> Torneos Oficiales</h3>
+          <p>Compite en cada fecha del Apertura, Clausura y la emocionante Copa Paraguay.</p>
         </div>
         <div className={`glass-panel ${styles.featureCard}`}>
-          <h3>⚡ Resultados en Vivo</h3>
-          <p>Notificaciones de goles, tarjetas y más al instante.</p>
+          <h3><span>⚡</span> Resultados en Vivo</h3>
+          <p>Obtén actualizaciones y notificaciones al instante de goles, tarjetas y finales.</p>
         </div>
         <div className={`glass-panel ${styles.featureCard}`}>
-          <h3>📊 Ranking</h3>
-          <p>Suma puntos por aciertos y conviértete en el campeón.</p>
+          <h3><span>📊</span> Ranking Global</h3>
+          <p>Suma puntos por cada predicción exacta y conviértete en el campeón absoluto.</p>
         </div>
       </div>
     </main>
