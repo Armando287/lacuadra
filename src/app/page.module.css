@@ -148,7 +148,7 @@
 .tickerTrack {
   display: flex;
   white-space: nowrap;
-  animation: scrollTicker 30s linear infinite;
+  animation: scrollTicker 120s linear infinite;
   width: max-content;
 }
 

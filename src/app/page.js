@@ -10,13 +10,35 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-    // Fetch latest matches for the ticker
     fetch('/api/matches')
       .then(res => res.json())
       .then(data => {
-        if (data.matches) {
-          // Double the array to make the infinite scroll smooth
-          setMatches([...data.matches, ...data.matches]);
+        if (data.matches && data.matches.length > 0) {
+          // Filtrar torneo activo
+          const activeTournaments = [...new Set(data.matches.filter(m => m.status === 'live' || m.status === 'upcoming').map(m => m.tournament))];
+          
+          let filtered = [];
+          if (activeTournaments.length > 0) {
+            const activeTournament = activeTournaments[0];
+            const tMatches = data.matches.filter(m => m.tournament === activeTournament);
+            
+            const rounds = [...new Set(tMatches.map(m => m.round))];
+            const firstActiveMatch = tMatches.find(m => m.status === 'live' || m.status === 'upcoming');
+            
+            if (firstActiveMatch) {
+              const currentRound = firstActiveMatch.round;
+              const currentIndex = rounds.indexOf(currentRound);
+              
+              const roundsToShow = [currentRound];
+              if (currentIndex > 0) roundsToShow.unshift(rounds[currentIndex - 1]); // Agregar la fecha anterior
+              
+              filtered = tMatches.filter(m => roundsToShow.includes(m.round));
+            } else {
+              filtered = tMatches;
+            }
+          }
+
+          setMatches([...filtered, ...filtered]);
         }
       })
       .catch(err => console.error(err));
