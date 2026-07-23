@@ -363,6 +363,7 @@ export default function AdminPage() {
                       <th>Partido</th>
                       <th>Estado</th>
                       <th>Torneo</th>
+                      <th>Jornada</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
@@ -374,7 +375,8 @@ export default function AdminPage() {
                           <strong>{m.home_team} {m.score_home !== null ? m.score_home : '-'}</strong> vs <strong>{m.score_away !== null ? m.score_away : '-'} {m.away_team}</strong>
                         </td>
                         <td>{m.status}</td>
-                        <td>{m.tournament} {m.round}</td>
+                        <td>{m.tournament}</td>
+                        <td>{m.round}</td>
                         <td>
                           <div className={styles.actions}>
                             <button className={styles.btnWarning} onClick={() => editMatch(m)}>Editar</button>
@@ -384,7 +386,7 @@ export default function AdminPage() {
                       </tr>
                     ))}
                     {dbMatches.filter(m => filterRound === '' || m.round === filterRound).length === 0 && (
-                      <tr><td colSpan="5" style={{ textAlign: 'center' }}>No hay partidos que coincidan con el filtro.</td></tr>
+                      <tr><td colSpan="6" style={{ textAlign: 'center' }}>No hay partidos que coincidan con el filtro.</td></tr>
                     )}
                   </tbody>
                 </table>
