@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Preloader from '@/components/Preloader';
 import styles from './edit.module.css';
 
 export default function EditProfile() {
@@ -135,7 +136,7 @@ export default function EditProfile() {
     }
   };
 
-  if (loading) return <div style={{ color: 'white', textAlign: 'center', marginTop: '5rem' }}>Cargando Editor...</div>;
+  if (loading) return <Preloader text="CARGANDO EDITOR..." />;
 
   return (
     <main className={styles.main}>

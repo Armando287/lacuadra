@@ -99,14 +99,29 @@ export default function Navbar() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user_token');
-    localStorage.removeItem('user_name');
-    localStorage.removeItem('user_is_admin');
-    setUsername(null);
-    setUserId(null);
-    setIsAdmin(false);
-    window.location.reload();
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: 'Cerrar Sesión',
+      text: '¿Estás seguro que deseas salir?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#ff4444',
+      cancelButtonColor: '#333',
+      confirmButtonText: 'Sí, salir',
+      cancelButtonText: 'Cancelar',
+      background: '#1a1a24',
+      color: '#fff'
+    });
+
+    if (result.isConfirmed) {
+      localStorage.removeItem('user_token');
+      localStorage.removeItem('user_name');
+      localStorage.removeItem('user_is_admin');
+      setUsername(null);
+      setUserId(null);
+      setIsAdmin(false);
+      window.location.reload();
+    }
   };
 
   const toggleMenu = () => {

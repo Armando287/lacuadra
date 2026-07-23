@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
+import Preloader from '@/components/Preloader';
 import styles from './stats.module.css';
 
 export default function StatsPage() {
@@ -23,12 +24,7 @@ export default function StatsPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Cargando estadísticas oficiales...</p>
-      </div>
-    );
+    return <Preloader text="CARGANDO ESTADÍSTICAS..." />;
   }
 
   if (!stats) {

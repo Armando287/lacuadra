@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import styles from './match-detail.module.css';
+import Preloader from '@/components/Preloader';
 
 export default function MatchDetail() {
   const params = useParams();
@@ -81,7 +82,7 @@ export default function MatchDetail() {
     }
   };
 
-  if (!match) return <div className={styles.loading}>Cargando...</div>;
+  if (!match) return <Preloader text="CARGANDO PARTIDO..." />;
 
   return (
     <main className={styles.main}>

@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Preloader from '@/components/Preloader';
 import styles from './search.module.css';
 
 function SearchResults() {
@@ -64,7 +65,7 @@ function SearchResults() {
 export default function SearchPage() {
   return (
     <main className={styles.main}>
-      <Suspense fallback={<div>Cargando...</div>}>
+      <Suspense fallback={<Preloader text="BUSCANDO..." />}>
         <SearchResults />
       </Suspense>
     </main>

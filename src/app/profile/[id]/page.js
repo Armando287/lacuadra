@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import Preloader from '@/components/Preloader';
 import styles from './profile.module.css';
 
 export default function PublicProfile() {
@@ -236,7 +237,7 @@ export default function PublicProfile() {
     }
   };
 
-  if (loading) return <div style={{ color: 'white', textAlign: 'center', marginTop: '5rem' }}>Cargando Perfil...</div>;
+  if (loading) return <Preloader text="CARGANDO PERFIL..." />;
   if (!profile) return (
     <div style={{ color: 'white', textAlign: 'center', marginTop: '5rem' }}>
       <h2>Usuario no encontrado.</h2>
