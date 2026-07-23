@@ -5,8 +5,8 @@ const s3 = new S3Client({
   region: 'us-east-1',
   endpoint: 'https://s3.hf.co/infovips',
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'HFAKRJvAzDiCp28xL4aeGd4nuC4SxP5',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '6005347d7394e0e7fb4733e647df15297003969f92868c6e79ffa5dcae46d905',
   },
   forcePathStyle: true
 });
@@ -18,10 +18,6 @@ export async function GET(request) {
 
     if (!file) {
       return new NextResponse('File not found', { status: 404 });
-    }
-
-    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-      return new NextResponse('Faltan credenciales AWS en el servidor.', { status: 500 });
     }
 
     const command = new GetObjectCommand({
