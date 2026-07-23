@@ -241,7 +241,7 @@ export default function MatchesPage() {
                       <div className={styles.teams}>
                         <div className={styles.team}>
                           <div className={styles.avatar}>
-                            {match.homeLogo ? <img src={match.homeLogo} alt={match.homeTeam} className={styles.avatarImg} /> : null}
+                            {match.homeLogo ? <img src={match.homeLogo.endsWith('/1') ? match.homeLogo : match.homeLogo + '/1'} alt={match.homeTeam} className={styles.avatarImg} /> : null}
                           </div>
                           <span>{match.homeTeam}</span>
                         </div>
@@ -250,7 +250,7 @@ export default function MatchesPage() {
                         </div>
                         <div className={styles.team}>
                           <div className={styles.avatar}>
-                            {match.awayLogo ? <img src={match.awayLogo} alt={match.awayTeam} className={styles.avatarImg} /> : null}
+                            {match.awayLogo ? <img src={match.awayLogo.endsWith('/1') ? match.awayLogo : match.awayLogo + '/1'} alt={match.awayTeam} className={styles.avatarImg} /> : null}
                           </div>
                           <span>{match.awayTeam}</span>
                         </div>
