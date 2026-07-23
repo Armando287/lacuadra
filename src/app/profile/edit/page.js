@@ -109,7 +109,12 @@ export default function EditProfile() {
           ctx.drawImage(img, 0, 0, width, height);
           
           canvas.toBlob((blob) => {
-            const newFile = new File([blob], file.name, {
+            if (!blob || blob.size < 100) {
+              return reject(new Error("Blob is empty, compression failed"));
+            }
+            // Ensure filename ends with .jpg so backend detects content-type correctly
+            const newName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+            const newFile = new File([blob], newName, {
               type: 'image/jpeg',
               lastModified: Date.now(),
             });

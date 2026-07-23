@@ -155,7 +155,11 @@ export default function PublicProfile() {
               canvas.height = height;
               const ctx = canvas.getContext('2d');
               ctx.drawImage(img, 0, 0, width, height);
-              canvas.toBlob((blob) => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg', 0.8);
+              canvas.toBlob((blob) => {
+                if (!blob || blob.size < 100) return reject(new Error("Empty blob"));
+                const newName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+                resolve(new File([blob], newName, { type: 'image/jpeg' }));
+              }, 'image/jpeg', 0.8);
             };
             img.onerror = (e) => reject(e);
           };
