@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import styles from './profile.module.css';
 
 export default function PublicProfile() {
@@ -182,7 +183,21 @@ export default function PublicProfile() {
   };
 
   const handleDeletePost = async (postId) => {
-    if (!confirm('¿Seguro que quieres eliminar esta publicación? Esto también borrará la imagen/video.')) return;
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Quieres eliminar esta publicación? Esto también borrará la imagen/video de forma permanente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ff4444',
+      cancelButtonColor: '#333',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#1a1a24',
+      color: '#fff'
+    });
+
+    if (!result.isConfirmed) return;
+
     const toastId = toast.loading('Eliminando...');
     try {
       const res = await fetch(`/api/posts/${postId}?user_id=${currentUserId}`, { method: 'DELETE' });

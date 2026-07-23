@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
+import Swal from 'sweetalert2';
 
 export default function Navbar() {
   const pathname = usePathname();

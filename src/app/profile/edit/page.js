@@ -9,6 +9,8 @@ export default function EditProfile() {
   const [userId, setUserId] = useState(null);
   
   // Profile Form States
+  const [username, setUsername] = useState('');
+  const [favoriteClub, setFavoriteClub] = useState('');
   const [phone, setPhone] = useState('');
   const [bio, setBio] = useState('');
   
@@ -38,6 +40,8 @@ export default function EditProfile() {
       const res = await fetch(`/api/users/profile?id=${id}`);
       const data = await res.json();
       if (data.success) {
+        setUsername(data.user.username || '');
+        setFavoriteClub(data.user.favorite_club || '');
         setPhone(data.user.phone || '');
         setBio(data.user.bio || '');
         setAvatarPreview(data.user.avatar_url || '');
@@ -105,6 +109,8 @@ export default function EditProfile() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: userId,
+          username,
+          favorite_club: favoriteClub,
           phone,
           bio,
           avatar_url: finalAvatarUrl,
@@ -170,6 +176,29 @@ export default function EditProfile() {
                 <span>Cambiar</span>
               </div>
             </div>
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Nombre de Usuario (Una vez cada 5 meses)</label>
+            <input 
+              type="text" 
+              className={styles.input} 
+              value={username} 
+              onChange={e => setUsername(e.target.value)} 
+              placeholder="Tu nombre de usuario"
+              required
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Club Favorito (Una vez cada 5 meses)</label>
+            <input 
+              type="text" 
+              className={styles.input} 
+              value={favoriteClub} 
+              onChange={e => setFavoriteClub(e.target.value)} 
+              placeholder="¿De qué club eres?"
+            />
           </div>
 
           <div className={styles.inputGroup}>

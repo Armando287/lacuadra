@@ -59,10 +59,10 @@ export async function PATCH(request) {
 
     if (!id) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
-    // 1. Fetch current user to get old URLs
+    // 1. Fetch current user to get old URLs and check cooldown
     const { data: currentUser, error: fetchErr } = await supabase
       .from('users')
-      .select('avatar_url, cover_url')
+      .select('avatar_url, cover_url, last_profile_edit')
       .eq('id', id)
       .single();
 
@@ -72,6 +72,29 @@ export async function PATCH(request) {
     if (phone !== undefined) updates.phone = phone;
     if (bio !== undefined) updates.bio = bio;
     
+    // Check Cooldown for username and club
+    const { username, favorite_club } = body;
+    if (username !== undefined || favorite_club !== undefined) {
+      if (currentUser.last_profile_edit) {
+        const lastEdit = new Date(currentUser.last_profile_edit);
+        const fiveMonthsAgo = new Date();
+        fiveMonthsAgo.setMonth(fiveMonthsAgo.getMonth() - 5);
+        
+        if (lastEdit > fiveMonthsAgo) {
+          const nextAvailableDate = new Date(lastEdit);
+          nextAvailableDate.setMonth(nextAvailableDate.getMonth() + 5);
+          return NextResponse.json({ 
+            success: false, 
+            error: `No puedes cambiar tu nombre o club todavía. Próxima edición disponible el ${nextAvailableDate.toLocaleDateString()}` 
+          }, { status: 403 });
+        }
+      }
+      
+      if (username !== undefined) updates.username = username;
+      if (favorite_club !== undefined) updates.favorite_club = favorite_club;
+      updates.last_profile_edit = new Date().toISOString();
+    }
+
     // Check if avatar is being replaced
     if (avatar_url !== undefined) {
       if (currentUser.avatar_url && currentUser.avatar_url !== avatar_url) {
