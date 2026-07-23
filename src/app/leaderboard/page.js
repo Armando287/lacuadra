@@ -7,6 +7,7 @@ export default function Leaderboard() {
   const [data, setData] = useState({ general: [], fans: [], rounds: {} });
   const [activeTab, setActiveTab] = useState('general'); // general, rounds, fans
   const [selectedRound, setSelectedRound] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/leaderboard')
@@ -16,6 +17,7 @@ export default function Leaderboard() {
         if (d.rounds && Object.keys(d.rounds).length > 0) {
           setSelectedRound(Object.keys(d.rounds)[0]);
         }
+        setLoading(false);
       });
   }, []);
 
@@ -74,18 +76,26 @@ export default function Leaderboard() {
           </select>
         </div>
         <div className={styles.list}>
+          <div className={styles.headerRow}>
+            <div className={styles.colPos}>#</div>
+            <div className={styles.colUser}>Usuario</div>
+            <div className={styles.colClub}>Premio</div>
+            <div className={styles.colPts}>Pts</div>
+          </div>
           {users.map((user, index) => (
             <div key={user.id} className={styles.row}>
-              <div className={styles.userCell}>
+              <div className={styles.colPos}>{index + 1}</div>
+              
+              <div className={styles.colUser}>
                 <img src={user.avatarUrl} alt={user.username} className={styles.avatar} />
                 <span className={styles.username}>{user.username}</span>
               </div>
               
-              <div className={styles.clubCell}>
-                 {user.isWinner ? 'GANADOR (+5)' : '-'}
+              <div className={styles.colClub}>
+                 {user.isWinner ? '🏆 GANADOR (+5)' : '-'}
               </div>
 
-              <div className={styles.pointsCell}>
+              <div className={styles.colPts}>
                 {user.points}
               </div>
             </div>
@@ -97,17 +107,25 @@ export default function Leaderboard() {
 
   const renderFans = () => (
     <div className={styles.list}>
+      <div className={styles.headerRow}>
+        <div className={styles.colPos}>#</div>
+        <div className={styles.colUser}>Club</div>
+        <div className={styles.colClub}>Líder</div>
+        <div className={styles.colPts}>Pts</div>
+      </div>
       {data.fans.map((fan, index) => (
         <div key={fan.club} className={styles.row}>
-          <div className={styles.userCell}>
+          <div className={styles.colPos}>{index + 1}</div>
+          
+          <div className={styles.colUser}>
             <span className={styles.username}>{fan.club}</span>
           </div>
           
-          <div className={styles.clubCell}>
-             {index === 0 ? 'LÍDER' : '-'}
+          <div className={styles.colClub}>
+             {index === 0 ? '🏆 LÍDER' : '-'}
           </div>
 
-          <div className={styles.pointsCell}>
+          <div className={styles.colPts}>
             {fan.points}
           </div>
         </div>
@@ -143,9 +161,18 @@ export default function Leaderboard() {
       </div>
 
       <div className={styles.tableContainer}>
-        {activeTab === 'general' && renderGeneral()}
-        {activeTab === 'rounds' && renderRounds()}
-        {activeTab === 'fans' && renderFans()}
+        {loading ? (
+          <div className={styles.loaderContainer}>
+            <div className={styles.loader}></div>
+            <p>Calculando posiciones...</p>
+          </div>
+        ) : (
+          <>
+            {activeTab === 'general' && renderGeneral()}
+            {activeTab === 'rounds' && renderRounds()}
+            {activeTab === 'fans' && renderFans()}
+          </>
+        )}
       </div>
     </main>
   );

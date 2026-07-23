@@ -84,94 +84,195 @@ export default function MatchesPage() {
 
   const isRoundActive = selectedRound === activeRound;
 
+  // Tabs
+  const [activeTab, setActiveTab] = useState('matches'); // 'matches' | 'predictions'
+  const [myVotes, setMyVotes] = useState([]);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('user_token');
+    if (token) {
+      setUserId(token);
+      fetch(`/api/votes?userId=${token}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.votes) setMyVotes(data.votes);
+        })
+        .catch(e => console.error(e));
+    }
+  }, []);
+
+  const getMatchForVote = (matchId) => {
+    return matches.find(m => m.id === matchId);
+  };
+
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>Centro de Partidos</h1>
       
-      {/* Filter Bar */}
-      <div className={styles.filterBar}>
-        <div className={styles.filterGroup}>
-          <label>Temporada:</label>
-          <select 
-            value={selectedYear} 
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className={styles.select}
-          >
-            <option value={currentYear}>{currentYear}</option>
-            <option value={currentYear - 1}>{currentYear - 1}</option>
-            <option value={currentYear - 2}>{currentYear - 2}</option>
-          </select>
-        </div>
-
-        <div className={styles.filterGroup}>
-          <label>Torneo:</label>
-          <select 
-            value={selectedTournament} 
-            onChange={(e) => setSelectedTournament(e.target.value)}
-            className={styles.select}
-            disabled={tournaments.length === 0}
-          >
-            {tournaments.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-        </div>
-
-        <div className={styles.filterGroup}>
-          <label>Fecha (Jornada):</label>
-          <select 
-            value={selectedRound} 
-            onChange={(e) => setSelectedRound(e.target.value)}
-            className={styles.select}
-            disabled={rounds.length === 0}
-          >
-            {rounds.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </div>
+      <div className={styles.tabsContainer} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+        <button 
+          className={`btn-primary`} 
+          style={{ background: activeTab === 'matches' ? 'var(--primary-color)' : 'transparent', color: activeTab === 'matches' ? 'var(--bg-dark)' : 'var(--text-main)', border: '1px solid var(--primary-color)' }}
+          onClick={() => setActiveTab('matches')}
+        >
+          Lista de Partidos
+        </button>
+        <button 
+          className={`btn-primary`} 
+          style={{ background: activeTab === 'predictions' ? 'var(--primary-color)' : 'transparent', color: activeTab === 'predictions' ? 'var(--bg-dark)' : 'var(--text-main)', border: '1px solid var(--primary-color)' }}
+          onClick={() => setActiveTab('predictions')}
+        >
+          Mis Predicciones
+        </button>
       </div>
-      
-      {loading ? (
-        <Preloader text="CARGANDO PARTIDOS..." />
-      ) : (
-        <div className={styles.grid}>
-          {filteredMatches.map(match => (
-            <Link href={`/matches/${match.id}?active=${isRoundActive}`} key={match.id}>
-              <div className={`glass-panel animate-fade-in ${styles.card}`}>
-                <div className={styles.cardContent}>
-                  <div className={styles.header}>
-                    <span className={styles.tournament}>{match.round || match.tournament}</span>
-                    <span className={`${styles.status} ${styles[match.status]}`}>
-                      {match.status === 'live' && <span className="status-dot live"></span>}
-                      {match.status === 'live' ? 'EN VIVO' : 
-                       match.status === 'finished' ? 'FINALIZADO' : 'PRÓXIMO'}
-                    </span>
-                  </div>
-                  
-                  <div className={styles.teams}>
-                    <div className={styles.team}>
-                      <div className={styles.avatar}>
-                        {match.homeLogo ? <img src={match.homeLogo} alt={match.homeTeam} className={styles.avatarImg} /> : null}
-                      </div>
-                      <span>{match.homeTeam}</span>
-                    </div>
-                    <div className={styles.score}>
-                      {match.scoreHome !== null ? `${match.scoreHome} - ${match.scoreAway}` : <span className={styles.vs}>VS</span>}
-                    </div>
-                    <div className={styles.team}>
-                      <div className={styles.avatar}>
-                        {match.awayLogo ? <img src={match.awayLogo} alt={match.awayTeam} className={styles.avatarImg} /> : null}
-                      </div>
-                      <span>{match.awayTeam}</span>
-                    </div>
-                  </div>
 
-                  <div className={styles.footer}>
-                    <span>{new Date(match.date).toLocaleString()}</span>
+      {activeTab === 'matches' && (
+        <>
+          {/* Filter Bar */}
+          <div className={styles.filterBar}>
+            <div className={styles.filterGroup}>
+              <label>Temporada:</label>
+              <select 
+                value={selectedYear} 
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className={styles.select}
+              >
+                <option value={currentYear}>{currentYear}</option>
+                <option value={currentYear - 1}>{currentYear - 1}</option>
+                <option value={currentYear - 2}>{currentYear - 2}</option>
+              </select>
+            </div>
+
+            <div className={styles.filterGroup}>
+              <label>Torneo:</label>
+              <select 
+                value={selectedTournament} 
+                onChange={(e) => setSelectedTournament(e.target.value)}
+                className={styles.select}
+                disabled={tournaments.length === 0}
+              >
+                {tournaments.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+
+            <div className={styles.filterGroup}>
+              <label>Fecha (Jornada):</label>
+              <select 
+                value={selectedRound} 
+                onChange={(e) => setSelectedRound(e.target.value)}
+                className={styles.select}
+                disabled={rounds.length === 0}
+              >
+                {rounds.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+          </div>
+          
+          {loading ? (
+            <Preloader text="CARGANDO PARTIDOS..." />
+          ) : (
+            <div className={styles.grid}>
+              {filteredMatches.map(match => (
+                <Link href={`/matches/${match.id}?active=${isRoundActive}`} key={match.id}>
+                  <div className={`glass-panel animate-fade-in ${styles.card}`}>
+                    <div className={styles.cardContent}>
+                      <div className={styles.header}>
+                        <span className={styles.tournament}>{match.round || match.tournament}</span>
+                        <span className={`${styles.status} ${styles[match.status]}`}>
+                          {match.status === 'live' && <span className="status-dot live"></span>}
+                          {match.status === 'live' ? 'EN VIVO' : 
+                           match.status === 'finished' ? 'FINALIZADO' : 'PRÓXIMO'}
+                        </span>
+                      </div>
+                      
+                      <div className={styles.teams}>
+                        <div className={styles.team}>
+                          <div className={styles.avatar}>
+                            {match.homeLogo ? <img src={match.homeLogo} alt={match.homeTeam} className={styles.avatarImg} /> : null}
+                          </div>
+                          <span>{match.homeTeam}</span>
+                        </div>
+                        <div className={styles.score}>
+                          {match.scoreHome !== null ? `${match.scoreHome} - ${match.scoreAway}` : <span className={styles.vs}>VS</span>}
+                        </div>
+                        <div className={styles.team}>
+                          <div className={styles.avatar}>
+                            {match.awayLogo ? <img src={match.awayLogo} alt={match.awayTeam} className={styles.avatarImg} /> : null}
+                          </div>
+                          <span>{match.awayTeam}</span>
+                        </div>
+                      </div>
+
+                      <div className={styles.footer}>
+                        <span>{new Date(match.date).toLocaleString()}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-          {filteredMatches.length === 0 && (
-            <div className={styles.noMatches}>No hay partidos programados para esta fecha.</div>
+                </Link>
+              ))}
+              {filteredMatches.length === 0 && (
+                <div className={styles.noMatches}>No hay partidos programados para esta fecha.</div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+
+      {activeTab === 'predictions' && (
+        <div>
+          {!userId ? (
+            <div className={`glass-panel`} style={{ padding: '2rem', textAlign: 'center' }}>
+              Inicia sesión para ver tus predicciones.
+            </div>
+          ) : myVotes.length === 0 ? (
+            <div className={`glass-panel`} style={{ padding: '2rem', textAlign: 'center' }}>
+              Aún no tienes predicciones activas. ¡Ve a la Lista de Partidos y vota!
+            </div>
+          ) : (
+            <div className={styles.grid}>
+              {myVotes.map(vote => {
+                const match = getMatchForVote(vote.match_id);
+                if (!match) return null;
+                return (
+                  <Link href={`/matches/${match.id}`} key={vote.id}>
+                    <div className={`glass-panel animate-fade-in ${styles.card}`} style={{ border: '2px solid rgba(0, 245, 118, 0.3)' }}>
+                      <div className={styles.cardContent}>
+                        <div className={styles.header}>
+                          <span className={styles.tournament}>Tu Predicción</span>
+                          <span className={`${styles.status} ${styles[match.status]}`}>
+                            {match.status === 'live' ? 'EN JUEGO' : 
+                             match.status === 'finished' ? 'CERRADA' : 'ACTIVA (Click para editar)'}
+                          </span>
+                        </div>
+                        
+                        <div className={styles.teams}>
+                          <div className={styles.team}>
+                            <div className={styles.avatar}>
+                              {match.homeLogo ? <img src={match.homeLogo} alt={match.homeTeam} className={styles.avatarImg} /> : null}
+                            </div>
+                            <span>{match.homeTeam}</span>
+                          </div>
+                          <div className={styles.score} style={{ color: 'var(--primary-color)' }}>
+                            {vote.predicted_score_home} - {vote.predicted_score_away}
+                          </div>
+                          <div className={styles.team}>
+                            <div className={styles.avatar}>
+                              {match.awayLogo ? <img src={match.awayLogo} alt={match.awayTeam} className={styles.avatarImg} /> : null}
+                            </div>
+                            <span>{match.awayTeam}</span>
+                          </div>
+                        </div>
+
+                        <div className={styles.footer} style={{ marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                          Partido: {match.homeTeam} vs {match.awayTeam} - {new Date(match.date).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           )}
         </div>
       )}

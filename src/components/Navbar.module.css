@@ -231,7 +231,7 @@
     align-items: flex-start;
     margin-top: auto;
     width: 100%;
-    gap: 1rem;
+    gap: 1.5rem;
     padding-top: 2rem;
     border-top: 1px solid rgba(255,255,255,0.05);
   }
@@ -239,17 +239,30 @@
   .authGroup .btn-primary {
     width: 100%;
     text-align: center;
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    color: var(--text-light) !important;
+    box-shadow: none !important;
   }
   
   .notificationWrapper {
     width: 100%;
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
   }
   
   .bellBtn {
-    align-self: flex-start;
-    padding: 10px 0;
+    padding: 0;
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+  }
+  
+  .badge {
+    top: -5px;
+    right: -10px;
+    font-size: 0.8rem;
+    padding: 4px 8px;
   }
   
   .notificationDropdown {
@@ -257,12 +270,12 @@
     width: 100%;
     box-shadow: none;
     border: none;
-    background: transparent;
-    padding-left: 10px;
-    margin-top: 10px;
-    border-left: 2px solid var(--accent);
-    border-radius: 0;
-    max-height: auto;
+    background: rgba(0,0,0,0.2);
+    padding: 0;
+    margin-top: 5px;
+    border-radius: 8px;
+    max-height: none;
+    animation: none;
   }
   
   /* Hamburger Animation */

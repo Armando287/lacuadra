@@ -423,10 +423,10 @@ export default function PublicProfile() {
                             src={post.media_url} 
                             controls 
                             className={styles.postMedia}
-                            preload="metadata"
+                            preload="none"
                           />
                         ) : (
-                          <img src={post.media_url} className={styles.postMedia} alt="Post media" />
+                          <img src={post.media_url} className={styles.postMedia} alt="Post media" loading="lazy" />
                         )}
                       </div>
                     )}

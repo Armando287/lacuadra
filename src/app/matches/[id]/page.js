@@ -22,12 +22,29 @@ export default function MatchDetail() {
     const searchParams = new URLSearchParams(window.location.search);
     setIsActiveRound(searchParams.get('active') === 'true');
 
+    // Fetch match details
     fetch('/api/matches')
       .then(res => res.json())
       .then(data => {
         const found = data.matches.find(m => m.id === params.id);
         setMatch(found);
       });
+
+    // Fetch existing user vote if logged in
+    if (token) {
+      fetch(`/api/votes?userId=${token}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.votes && data.votes.length > 0) {
+            const existingVote = data.votes.find(v => v.match_id === params.id);
+            if (existingVote) {
+              setVoteHome(existingVote.predicted_score_home);
+              setVoteAway(existingVote.predicted_score_away);
+            }
+          }
+        })
+        .catch(e => console.error(e));
+    }
   }, [params.id]);
 
   const handleVote = async (e) => {
