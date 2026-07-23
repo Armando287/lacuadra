@@ -21,12 +21,13 @@ export default function MatchesPage() {
   const [phases, setPhases] = useState([]);
   const [rounds, setRounds] = useState([]);
 
-  // Helper function to extract base tournament and phase
-  const parseTournament = (tStr) => {
-    if (!tStr) return { base: '', phase: '' };
-    if (tStr.endsWith(' Clausura')) return { base: tStr.replace(' Clausura', ''), phase: 'Clausura' };
-    if (tStr.endsWith(' Apertura')) return { base: tStr.replace(' Apertura', ''), phase: 'Apertura' };
-    return { base: tStr, phase: '' };
+  // Helper function to extract phase and matchday from round string
+  const parseRound = (roundStr) => {
+    if (!roundStr) return { phase: '', matchday: '' };
+    const parts = roundStr.split(' - ');
+    if (parts.length === 2) return { phase: parts[0], matchday: parts[1] };
+    if (roundStr.includes('Clausura') || roundStr.includes('Apertura')) return { phase: roundStr, matchday: '' };
+    return { phase: '', matchday: roundStr };
   };
 
   useEffect(() => {
@@ -40,9 +41,8 @@ export default function MatchesPage() {
         }
         setMatches(data.matches);
         
-        // Extract unique tournaments (base names)
-        const allParsed = data.matches.map(m => parseTournament(m.tournament));
-        const t = [...new Set(allParsed.map(p => p.base))];
+        // Extract unique tournaments
+        const t = [...new Set(data.matches.map(m => m.tournament))];
         setTournaments(t);
         if (t.length > 0 && (!selectedTournament || !t.includes(selectedTournament))) {
           setSelectedTournament(t[0]);
@@ -56,11 +56,11 @@ export default function MatchesPage() {
   useEffect(() => {
     if (!selectedTournament || matches.length === 0) return;
     
-    // Filter matches that belong to the base tournament
-    const tournamentMatches = matches.filter(m => parseTournament(m.tournament).base === selectedTournament);
+    // Filter matches that belong to the tournament
+    const tournamentMatches = matches.filter(m => m.tournament === selectedTournament);
     
-    // Extract phases for this tournament
-    const p = [...new Set(tournamentMatches.map(m => parseTournament(m.tournament).phase).filter(Boolean))];
+    // Extract phases for this tournament from the round string
+    const p = [...new Set(tournamentMatches.map(m => parseRound(m.round).phase).filter(Boolean))];
     setPhases(p);
     
     let activePhase = p[0] || '';
@@ -76,14 +76,14 @@ export default function MatchesPage() {
     }
 
     // Filter matches by tournament AND phase
-    const phaseMatches = tournamentMatches.filter(m => parseTournament(m.tournament).phase === activePhase);
-    const r = [...new Set(phaseMatches.map(m => m.round))];
+    const phaseMatches = tournamentMatches.filter(m => parseRound(m.round).phase === activePhase);
+    const r = [...new Set(phaseMatches.map(m => parseRound(m.round).matchday).filter(Boolean))];
     setRounds(r);
 
     // Determine the "Active Round" (the first one with an upcoming/live match)
     let activeRound = r[0];
     for (let roundName of r) {
-      const rm = phaseMatches.filter(m => m.round === roundName);
+      const rm = phaseMatches.filter(m => parseRound(m.round).matchday === roundName);
       if (rm.some(m => m.status === 'upcoming' || m.status === 'live')) {
         activeRound = roundName;
         break;
@@ -95,8 +95,10 @@ export default function MatchesPage() {
   // Derived filtered matches
   const filteredMatches = matches
     .filter(m => {
-      const parsed = parseTournament(m.tournament);
-      return parsed.base === selectedTournament && parsed.phase === selectedPhase && m.round === selectedRound;
+      const parsed = parseRound(m.round);
+      if (m.tournament !== selectedTournament || parsed.phase !== selectedPhase) return false;
+      if (rounds.length > 0 && parsed.matchday !== selectedRound) return false;
+      return true;
     })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -105,12 +107,12 @@ export default function MatchesPage() {
   useEffect(() => {
     if (!selectedTournament || matches.length === 0 || rounds.length === 0) return;
     const phaseMatches = matches.filter(m => {
-      const parsed = parseTournament(m.tournament);
-      return parsed.base === selectedTournament && parsed.phase === selectedPhase;
+      const parsed = parseRound(m.round);
+      return m.tournament === selectedTournament && parsed.phase === selectedPhase;
     });
     let currentActive = rounds[0];
     for (let roundName of rounds) {
-      const rm = phaseMatches.filter(m => m.round === roundName);
+      const rm = phaseMatches.filter(m => parseRound(m.round).matchday === roundName);
       if (rm.some(m => m.status === 'upcoming' || m.status === 'live')) {
         currentActive = roundName;
         break;
@@ -228,7 +230,7 @@ export default function MatchesPage() {
                   <div className={`glass-panel animate-fade-in ${styles.card}`}>
                     <div className={styles.cardContent}>
                       <div className={styles.header}>
-                        <span className={styles.tournament}>{match.round || match.tournament}</span>
+                        <span className={styles.tournament}>{parseRound(match.round).matchday || parseRound(match.round).phase || match.tournament}</span>
                         <span className={`${styles.status} ${styles[match.status]}`}>
                           {match.status === 'live' && <span className="status-dot live"></span>}
                           {match.status === 'live' ? 'EN VIVO' : 
@@ -289,7 +291,7 @@ export default function MatchesPage() {
                     <div className={`glass-panel animate-fade-in ${styles.card}`} style={{ border: '2px solid rgba(0, 245, 118, 0.3)' }}>
                       <div className={styles.cardContent}>
                         <div className={styles.header}>
-                          <span className={styles.tournament}>Tu Predicción</span>
+                          <span className={styles.tournament}>{parseRound(match.round).matchday || match.tournament}</span>
                           <span className={`${styles.status} ${styles[match.status]}`}>
                             {match.status === 'live' ? 'EN JUEGO' : 
                              match.status === 'finished' ? 'CERRADA' : 'ACTIVA (Click para editar)'}
