@@ -168,7 +168,17 @@ export async function getPromiedosRounds() {
  */
 export async function getPromiedosMatchesByRound(filterKey, phase = '') {
   try {
-    const apiUrl = `https://api.promiedos.com.ar/league/games/gcb/${filterKey}`;
+    const rounds = await getPromiedosRounds();
+    
+    // Si filterKey es un número (ej. "3"), lo buscamos en los rounds
+    let targetRoundKey = filterKey;
+    if (!filterKey.includes('_')) {
+      const pLower = phase ? phase.toLowerCase() : '';
+      const found = rounds.find(r => r.name === `Fecha ${filterKey}` && (!pLower || r.phase.toLowerCase().includes(pLower)));
+      if (found) targetRoundKey = found.key;
+    }
+
+    const apiUrl = `https://api.promiedos.com.ar/league/games/gcb/${targetRoundKey}`;
     
     const res = await fetch(apiUrl, { headers: HEADERS });
     if (!res.ok) throw new Error(`Promiedos API error: ${res.status}`);
@@ -179,12 +189,13 @@ export async function getPromiedosMatchesByRound(filterKey, phase = '') {
     if (!gamesRaw || !Array.isArray(gamesRaw)) return [];
     
     // Convertir al mismo formato usando parseGames
-    const games = parseGames(gamesRaw);
+    const phasePrefix = phase ? (phase.charAt(0).toUpperCase() + phase.slice(1)) : 'Fase';
+    const roundName = filterKey.includes('_') ? 'Jornada' : `Fecha ${filterKey}`;
+    const games = parseGames(gamesRaw, `${phasePrefix} - ${roundName}`);
     
     return games.map(g => ({
       ...g,
-      tournament: 'Primera División de Paraguay',
-      round: phase ? `${phase} - ${g.round}` : g.round
+      tournament: 'Primera División de Paraguay'
     }));
   } catch (error) {
     console.error("Error fetching round:", error);
