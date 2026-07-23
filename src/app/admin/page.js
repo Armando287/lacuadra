@@ -10,8 +10,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   
   // States for Matches Fetcher
-  const [tournament, setTournament] = useState('Primera División de Paraguay');
-  const [round, setRound] = useState('Clausura');
+  const [liga, setLiga] = useState('Primera División de Paraguay');
+  const [fase, setFase] = useState('Clausura');
+  const [jornada, setJornada] = useState('Fecha 1');
   const [isFetchingMatches, setIsFetchingMatches] = useState(false);
   const [matchMessage, setMatchMessage] = useState('');
 
@@ -84,14 +85,15 @@ export default function AdminPage() {
     setIsFetchingMatches(true);
     setMatchMessage('');
     try {
+      const fullTournament = fase ? `${liga} ${fase}` : liga;
       const res = await fetch('/api/admin/matches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'fetch_google', tournament, round })
+        body: JSON.stringify({ action: 'fetch_google', tournament: fullTournament, round: jornada })
       });
       const data = await res.json();
       if (data.success) {
-        setMatchMessage(`Sincronización exitosa. Se guardaron ${data.saved} partidos en la base de datos.`);
+        setMatchMessage(`Sincronización exitosa. Se guardaron ${data.saved || data.count} partidos en la base de datos.`);
         fetchMatches();
       } else {
         setMatchMessage(`Error al sincronizar: ${data.error}`);
@@ -185,26 +187,38 @@ export default function AdminPage() {
         <section className={`glass-panel ${styles.panel}`}>
           <h2>Sincronizar Partidos</h2>
           <p style={{ marginBottom: '1rem', color: '#ccc' }}>
-            Usa esta herramienta para buscar una fecha en Google y guardarla permanentemente en tu base de datos. Esto ahorra consultas de API y hace que la app vuele para los usuarios.
+            Usa esta herramienta para buscar los partidos de esta semana en Google y guardarlos.
+            Llena los campos abajo para forzar la etiqueta de la fecha.
           </p>
           <form onSubmit={handleFetchMatches} className={styles.form}>
             <div className={styles.inputGroup}>
-              <label>Torneo</label>
+              <label>Liga / País</label>
               <input 
                 type="text" 
-                value={tournament} 
-                onChange={(e) => setTournament(e.target.value)} 
+                value={liga} 
+                onChange={(e) => setLiga(e.target.value)} 
                 required 
                 className={styles.input}
               />
             </div>
             <div className={styles.inputGroup}>
-              <label>Fecha / Jornada (Opcional)</label>
+              <label>Fase (Apertura / Clausura)</label>
               <input 
                 type="text" 
-                value={round} 
-                onChange={(e) => setRound(e.target.value)} 
-                placeholder="Ej. Clausura, Apertura, Fecha 1..."
+                value={fase} 
+                onChange={(e) => setFase(e.target.value)} 
+                placeholder="Ej. Clausura"
+                className={styles.input}
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label>Jornada (Ej: Fecha 2)</label>
+              <input 
+                type="text" 
+                value={jornada} 
+                onChange={(e) => setJornada(e.target.value)} 
+                placeholder="Ej. Fecha 2"
+                required
                 className={styles.input}
               />
             </div>
