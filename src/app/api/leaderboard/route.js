@@ -1,21 +1,23 @@
 import { NextResponse } from 'next/server';
-import { readDB } from '@/lib/db';
-import { getGoogleMatches } from '@/lib/serpapi-scraper';
+import { supabase } from '@/lib/supabase';
 import { calculateMatchPoints } from '@/lib/scoring';
 
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const yearParam = searchParams.get('year');
-  const targetYear = yearParam ? parseInt(yearParam) : new Date().getFullYear();
-
   try {
-    const db = readDB();
-    const users = db.users;
-    const votes = db.votes;
-    
-    // Fetch real matches to evaluate votes
-    const matches = await getGoogleMatches();
-    
+    const { data: usersData, error: usersError } = await supabase.from('users').select('*');
+    if (usersError) throw usersError;
+
+    const { data: matchesData, error: matchesError } = await supabase.from('matches').select('*');
+    if (matchesError) throw matchesError;
+
+    const { data: votesData, error: votesError } = await supabase.from('votes').select('*');
+    if (votesError) throw votesError;
+
+    // Convert snake_case to camelCase where needed
+    const users = usersData.map(u => ({ id: u.id, username: u.username, avatarUrl: u.avatar_url, favoriteClub: u.favorite_club, points: u.points }));
+    const matches = matchesData.map(m => ({ id: m.id, round: m.round, scoreHome: m.score_home, scoreAway: m.score_away, status: m.status }));
+    const votes = votesData.map(v => ({ id: v.id, userId: v.user_id, matchId: v.match_id, predictedScoreHome: v.predicted_score_home, predictedScoreAway: v.predicted_score_away }));
+
     // Evaluate points for each vote
     const evaluatedVotes = votes.map(vote => {
       const match = matches.find(m => m.id === vote.matchId);
@@ -34,7 +36,7 @@ export async function GET(request) {
         exactHits: 0,
         roundWins: 0,
         totalPredictions: 0,
-        roundScores: {} // { "Clausura - 1": 15, ... }
+        roundScores: {}
       };
     });
 
@@ -52,7 +54,6 @@ export async function GET(request) {
     });
 
     // Calculate Round Winners and assign +5 bonus
-    // Get unique rounds
     const rounds = [...new Set(evaluatedVotes.map(v => v.round).filter(r => r))];
     const roundWinners = {};
 
@@ -66,8 +67,6 @@ export async function GET(request) {
           maxPoints = score;
           winners = [u.id];
         } else if (score === maxPoints && score > 0) {
-          // Tie breakers for round: 1) Exact Hits in that round (we approximate with total exact hits for simplicity, or we can just share the bonus)
-          // For simplicity, if there's a tie, all tied users get the bonus (or we can just skip tie breaker for now)
           winners.push(u.id);
         }
       });
@@ -106,7 +105,7 @@ export async function GET(request) {
     });
 
     const fansLeaderboard = Object.entries(fansBattle)
-      .filter(([club, _]) => club !== 'Sin Club')
+      .filter(([club, _]) => club !== 'Sin Club' && club !== '-')
       .map(([club, points]) => ({ club, points }))
       .sort((a, b) => b.points - a.points);
 
