@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from './matches.module.css';
 import Preloader from '@/components/Preloader';
+import { getTeamLogoUrl } from '@/lib/team-logos';
 
 export default function MatchesPage() {
   const currentYear = new Date().getFullYear();
@@ -241,7 +242,7 @@ export default function MatchesPage() {
                       <div className={styles.teams}>
                         <div className={styles.team}>
                           <div className={styles.avatar}>
-                            {match.homeLogo ? <img src={match.homeLogo.endsWith('/1') ? match.homeLogo : match.homeLogo + '/1'} alt={match.homeTeam} className={styles.avatarImg} /> : null}
+                            {(match.homeLogo || getTeamLogoUrl(match.homeTeam)) ? <img src={(() => { const url = match.homeLogo || getTeamLogoUrl(match.homeTeam); return url.endsWith('/1') ? url : url + '/1'; })()} alt={match.homeTeam} className={styles.avatarImg} /> : null}
                           </div>
                           <span>{match.homeTeam}</span>
                         </div>
@@ -250,7 +251,7 @@ export default function MatchesPage() {
                         </div>
                         <div className={styles.team}>
                           <div className={styles.avatar}>
-                            {match.awayLogo ? <img src={match.awayLogo.endsWith('/1') ? match.awayLogo : match.awayLogo + '/1'} alt={match.awayTeam} className={styles.avatarImg} /> : null}
+                            {(match.awayLogo || getTeamLogoUrl(match.awayTeam)) ? <img src={(() => { const url = match.awayLogo || getTeamLogoUrl(match.awayTeam); return url.endsWith('/1') ? url : url + '/1'; })()} alt={match.awayTeam} className={styles.avatarImg} /> : null}
                           </div>
                           <span>{match.awayTeam}</span>
                         </div>
