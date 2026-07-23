@@ -25,14 +25,25 @@ export async function GET(request) {
       Key: file,
     });
 
-    const response = await s3.send(command);
+    const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
     
-    // Convert ReadableStream to byte array (available in AWS SDK v3)
-    const bytes = await response.Body.transformToByteArray();
+    const hfRes = await fetch(url);
+    if (!hfRes.ok) {
+      return new NextResponse('Image not found', { status: 404 });
+    }
 
-    return new NextResponse(bytes, {
+    const arrayBuffer = await hfRes.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    let contentType = 'image/jpeg';
+    if (file.toLowerCase().endsWith('.png')) contentType = 'image/png';
+    else if (file.toLowerCase().endsWith('.gif')) contentType = 'image/gif';
+    else if (file.toLowerCase().endsWith('.webp')) contentType = 'image/webp';
+
+    return new NextResponse(buffer, {
       headers: {
-        'Content-Type': response.ContentType || 'image/jpeg',
+        'Content-Type': contentType,
         'Cache-Control': 'public, max-age=31536000, immutable'
       }
     });
