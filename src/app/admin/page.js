@@ -36,6 +36,72 @@ export default function AdminPage() {
     fetchMatches();
   }, [router]);
 
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch('/api/admin/users');
+      const data = await res.json();
+      if (data.success) {
+        setUsers(data.users);
+      }
+      setLoading(false);
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+    }
+  };
+
+  const toggleBan = async (id, currentStatus) => {
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle_ban', userId: id, isBanned: !currentStatus })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUsers(users.map(u => u.id === id ? { ...u, is_banned: !currentStatus } : u));
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const deleteUser = async (id) => {
+    if (!confirm('¿Seguro que quieres eliminar este usuario permanentemente?')) return;
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', userId: id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUsers(users.filter(u => u.id !== id));
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleFetchMatches = async (e) => {
+    e.preventDefault();
+    setIsFetchingMatches(true);
+    setMatchMessage('');
+    try {
+      const res = await fetch('/api/admin/matches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'fetch_google', tournament, round })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMatchMessage(`Sincronización exitosa. Se guardaron ${data.saved} partidos en la base de datos.`);
+        fetchMatches();
+      } else {
+        setMatchMessage(`Error al sincronizar: ${data.error}`);
+      }
+    } catch (e) {
+      setMatchMessage('Ocurrió un error al contactar con la API.');
+    }
+    setIsFetchingMatches(false);
+  };
+
   const fetchMatches = async () => {
     try {
       const res = await fetch('/api/admin/matches');
