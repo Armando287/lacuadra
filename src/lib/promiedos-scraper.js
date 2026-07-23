@@ -97,6 +97,14 @@ export async function getPromiedosMatches() {
       throw new Error('Formato de datos de Promiedos cambiado');
     }
     
+    // Get the current phase to assign it properly
+    const activeFilter = filters.find(f => f.key !== 'latest' && f.games && f.games.length > 0);
+    const filterKey = activeFilter?.key || '';
+    
+    let phase = 'Clausura'; // Fallback
+    if (filterKey.includes('_3_')) phase = 'Apertura';
+    if (filterKey.includes('_4_')) phase = 'Clausura';
+    
     let allMatches = [];
     
     for (const filter of filters) {
@@ -104,7 +112,8 @@ export async function getPromiedosMatches() {
       if (filter.key === 'latest') continue;
       
       const games = parseGames(filter.games, roundName);
-      allMatches.push(...games);
+      const mappedGames = games.map(g => ({ ...g, tournament: `Primera División de Paraguay ${phase}` }));
+      allMatches.push(...mappedGames);
     }
     
     return allMatches;
@@ -125,9 +134,22 @@ export async function getPromiedosRounds() {
     
     if (!filters || !Array.isArray(filters)) return [];
     
+    let currentPhase = 'Apertura';
+    let phaseCount = 0;
+
     return filters
       .filter(f => f.key !== 'latest')
-      .map(f => ({ name: f.name, key: f.key, hasGames: !!(f.games && f.games.length > 0) }));
+      .map(f => {
+        if (f.name === 'Fecha 1') phaseCount++;
+        if (phaseCount === 2) currentPhase = 'Clausura';
+        
+        return { 
+          name: f.name, 
+          key: f.key, 
+          phase: currentPhase,
+          hasGames: !!(f.games && f.games.length > 0) 
+        };
+      });
   } catch (error) {
     console.error("Error fetching rounds:", error);
     return [];
@@ -135,37 +157,32 @@ export async function getPromiedosRounds() {
 }
 
 /**
- * Obtiene los partidos de una fecha específica usando el endpoint Next.js data.
+ * Obtiene los partidos de una fecha específica usando la API interna de Promiedos.
  * @param {string} filterKey - El key del filtro, ej: "621_152_4_1"
+ * @param {string} phase - "Apertura" o "Clausura"
  */
-export async function getPromiedosMatchesByRound(filterKey) {
+export async function getPromiedosMatchesByRound(filterKey, phase = '') {
   try {
-    // Primero obtenemos el buildId actual
-    const data = await fetchPageData(PROMIEDOS_URL);
-    const buildId = data.buildId;
-    
-    if (!buildId) throw new Error('No se pudo obtener buildId de Promiedos');
-    
-    // Usamos la API interna de Next.js con el filtro
-    const apiUrl = `https://www.promiedos.com.ar/_next/data/${buildId}/league/copa-de-primera/gcb.json?filter=${filterKey}&urlName=copa-de-primera&id=gcb`;
+    const apiUrl = `https://api.promiedos.com.ar/league/games/gcb/${filterKey}`;
     
     const res = await fetch(apiUrl, { headers: HEADERS });
     if (!res.ok) throw new Error(`Promiedos API error: ${res.status}`);
     
     const apiData = await res.json();
-    const filters = apiData.pageProps?.data?.games?.filters;
+    const gamesRaw = apiData.games;
     
-    if (!filters || !Array.isArray(filters)) return [];
+    if (!gamesRaw || !Array.isArray(gamesRaw)) return [];
     
-    let allMatches = [];
+    // Convertir al mismo formato usando parseGames
+    const games = parseGames(gamesRaw);
     
-    for (const filter of filters) {
-      if (filter.key === 'latest') continue;
-      const games = parseGames(filter.games, filter.name);
-      allMatches.push(...games);
-    }
+    // Re-mapear el torneo con la fase correcta (ej: Primera División de Paraguay Clausura)
+    const tournamentName = phase ? `Primera División de Paraguay ${phase}` : 'Primera División de Paraguay';
     
-    return allMatches;
+    return games.map(g => ({
+      ...g,
+      tournament: tournamentName
+    }));
   } catch (error) {
     console.error("Error fetching round:", error);
     return [];

@@ -104,12 +104,16 @@ export default function AdminPage() {
     setIsFetchingMatches(true);
     setMatchMessage('');
     try {
+      const selectedRoundObj = availableRounds.find(r => r.key === selectedRound);
+      const phase = selectedRoundObj ? selectedRoundObj.phase : '';
+
       const res = await fetch('/api/admin/matches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           action: 'fetch_promiedos', 
-          filterKey: selectedRound || undefined
+          filterKey: selectedRound || undefined,
+          phase: phase
         })
       });
       const data = await res.json();
@@ -255,7 +259,7 @@ export default function AdminPage() {
                     <option value="">-- Fecha activa (actual) --</option>
                     {availableRounds.map(r => (
                       <option key={r.key} value={r.key}>
-                        {r.name} {r.hasGames ? '✅' : ''}
+                        [{r.phase}] {r.name} {r.hasGames ? '✅' : ''}
                       </option>
                     ))}
                   </select>

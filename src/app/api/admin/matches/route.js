@@ -25,14 +25,14 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { action, round, tournament, match, filterKey } = body;
+    const { action, round, tournament, match, filterKey, phase } = body;
 
     if (action === 'fetch_promiedos') {
       let apiMatches;
       
       // Si se especificó un filterKey, traer esa fecha específica
       if (filterKey) {
-        apiMatches = await getPromiedosMatchesByRound(filterKey);
+        apiMatches = await getPromiedosMatchesByRound(filterKey, phase);
       } else {
         // Si no, traer la fecha activa (actual)
         apiMatches = await getPromiedosMatches();
