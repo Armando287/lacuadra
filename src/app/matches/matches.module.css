@@ -242,3 +242,41 @@
   border-radius: 16px;
   border: 1px dashed rgba(255, 255, 255, 0.1);
 }
+
+@media (max-width: 768px) {
+  .main {
+    padding: 6rem 1rem 2rem 1rem;
+  }
+  
+  .title {
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .filterBar {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .score {
+    font-size: 1.8rem;
+    padding: 0 0.5rem;
+    min-width: 60px;
+  }
+  
+  .team {
+    font-size: 0.9rem;
+  }
+  
+  .avatar {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .avatarImg {
+    width: 30px;
+    height: 30px;
+  }
+}

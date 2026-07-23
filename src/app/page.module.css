@@ -214,5 +214,17 @@
 /* Mobile Adjustments */
 @media (max-width: 768px) {
   .floatCard { display: none; } /* Hide 3D cards on mobile to avoid clutter */
-  .massiveTitle { font-size: 4rem; }
+  .massiveTitle { font-size: 3.5rem; }
+  .heroDescription { font-size: 1rem; padding: 0 1rem; }
+  
+  /* Mobile panning animation for background */
+  .stadiumBg {
+    background-size: cover;
+    animation: panBackground 30s linear infinite alternate;
+  }
+}
+
+@keyframes panBackground {
+  0% { background-position: left center; }
+  100% { background-position: right center; }
 }

@@ -11,6 +11,8 @@ export default function Navbar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userId, setUserId] = useState(null);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     const name = localStorage.getItem('user_name');
     const id = localStorage.getItem('user_token');
@@ -24,6 +26,8 @@ export default function Navbar() {
     if (adminFlag === 'true') {
       setIsAdmin(true);
     }
+    // Close menu when route changes
+    setMenuOpen(false);
   }, [pathname]);
 
   const handleLogout = () => {
@@ -36,6 +40,10 @@ export default function Navbar() {
     window.location.reload();
   };
 
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   return (
     <header className={styles.header}>
       <nav className={styles.navbar}>
@@ -44,7 +52,15 @@ export default function Navbar() {
             <img src="/logo.png" alt="La Cuadra" style={{ height: '40px', width: 'auto' }} />
           </Link>
         </div>
-        <div className={styles.links}>
+        
+        {/* Hamburger Icon for Mobile */}
+        <button className={styles.hamburger} onClick={toggleMenu}>
+          <span className={`${styles.bar} ${menuOpen ? styles.open : ''}`}></span>
+          <span className={`${styles.bar} ${menuOpen ? styles.open : ''}`}></span>
+          <span className={`${styles.bar} ${menuOpen ? styles.open : ''}`}></span>
+        </button>
+
+        <div className={`${styles.links} ${menuOpen ? styles.mobileOpen : ''}`}>
           {isAdmin && (
             <Link href="/admin" className={`${styles.link} ${pathname === '/admin' ? styles.active : ''}`} style={{ color: 'var(--accent)' }}>
               👑 Admin Panel
@@ -73,7 +89,7 @@ export default function Navbar() {
             />
           </form>
           {username ? (
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div className={styles.authGroup}>
               <Link href={`/profile/${userId}`} style={{ color: '#fff', fontWeight: 'bold', textDecoration: 'none' }} className={styles.profileLink}>
                 👤 {username}
               </Link>
