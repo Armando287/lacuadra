@@ -13,11 +13,21 @@ export default function MatchesPage() {
   
   // Filter States
   const [selectedTournament, setSelectedTournament] = useState('');
+  const [selectedPhase, setSelectedPhase] = useState('');
   const [selectedRound, setSelectedRound] = useState('');
 
   // Dropdown options
   const [tournaments, setTournaments] = useState([]);
+  const [phases, setPhases] = useState([]);
   const [rounds, setRounds] = useState([]);
+
+  // Helper function to extract base tournament and phase
+  const parseTournament = (tStr) => {
+    if (!tStr) return { base: '', phase: '' };
+    if (tStr.endsWith(' Clausura')) return { base: tStr.replace(' Clausura', ''), phase: 'Clausura' };
+    if (tStr.endsWith(' Apertura')) return { base: tStr.replace(' Apertura', ''), phase: 'Apertura' };
+    return { base: tStr, phase: '' };
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -30,10 +40,11 @@ export default function MatchesPage() {
         }
         setMatches(data.matches);
         
-        // Extract unique tournaments
-        const t = [...new Set(data.matches.map(m => m.tournament))];
+        // Extract unique tournaments (base names)
+        const allParsed = data.matches.map(m => parseTournament(m.tournament));
+        const t = [...new Set(allParsed.map(p => p.base))];
         setTournaments(t);
-        if (t.length > 0 && !t.includes(selectedTournament)) {
+        if (t.length > 0 && (!selectedTournament || !t.includes(selectedTournament))) {
           setSelectedTournament(t[0]);
         }
         setLoading(false);
@@ -41,46 +52,72 @@ export default function MatchesPage() {
       .catch(() => setLoading(false));
   }, [selectedYear]);
 
-  // When tournament changes, extract rounds and set active round
+  // When tournament changes, extract phases and rounds
   useEffect(() => {
     if (!selectedTournament || matches.length === 0) return;
     
-    const tournamentMatches = matches.filter(m => m.tournament === selectedTournament);
-    const r = [...new Set(tournamentMatches.map(m => m.round))];
+    // Filter matches that belong to the base tournament
+    const tournamentMatches = matches.filter(m => parseTournament(m.tournament).base === selectedTournament);
+    
+    // Extract phases for this tournament
+    const p = [...new Set(tournamentMatches.map(m => parseTournament(m.tournament).phase).filter(Boolean))];
+    setPhases(p);
+    
+    let activePhase = p[0] || '';
+    if (p.length > 0) {
+      if (!selectedPhase || !p.includes(selectedPhase)) {
+        activePhase = p[0];
+        setSelectedPhase(activePhase);
+      } else {
+        activePhase = selectedPhase;
+      }
+    } else {
+      setSelectedPhase('');
+    }
+
+    // Filter matches by tournament AND phase
+    const phaseMatches = tournamentMatches.filter(m => parseTournament(m.tournament).phase === activePhase);
+    const r = [...new Set(phaseMatches.map(m => m.round))];
     setRounds(r);
 
     // Determine the "Active Round" (the first one with an upcoming/live match)
     let activeRound = r[0];
     for (let roundName of r) {
-      const rm = tournamentMatches.filter(m => m.round === roundName);
+      const rm = phaseMatches.filter(m => m.round === roundName);
       if (rm.some(m => m.status === 'upcoming' || m.status === 'live')) {
         activeRound = roundName;
         break;
       }
     }
     setSelectedRound(activeRound || r[r.length - 1]);
-  }, [selectedTournament, matches]);
+  }, [selectedTournament, selectedPhase, matches]);
 
   // Derived filtered matches
   const filteredMatches = matches
-    .filter(m => m.tournament === selectedTournament && m.round === selectedRound)
+    .filter(m => {
+      const parsed = parseTournament(m.tournament);
+      return parsed.base === selectedTournament && parsed.phase === selectedPhase && m.round === selectedRound;
+    })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
   // Check if the selected round is the active round
   const [activeRound, setActiveRound] = useState('');
   useEffect(() => {
     if (!selectedTournament || matches.length === 0 || rounds.length === 0) return;
-    const tournamentMatches = matches.filter(m => m.tournament === selectedTournament);
+    const phaseMatches = matches.filter(m => {
+      const parsed = parseTournament(m.tournament);
+      return parsed.base === selectedTournament && parsed.phase === selectedPhase;
+    });
     let currentActive = rounds[0];
     for (let roundName of rounds) {
-      const rm = tournamentMatches.filter(m => m.round === roundName);
+      const rm = phaseMatches.filter(m => m.round === roundName);
       if (rm.some(m => m.status === 'upcoming' || m.status === 'live')) {
         currentActive = roundName;
         break;
       }
     }
     setActiveRound(currentActive);
-  }, [selectedTournament, matches, rounds]);
+  }, [selectedTournament, selectedPhase, matches, rounds]);
 
   const isRoundActive = selectedRound === activeRound;
 
@@ -155,6 +192,19 @@ export default function MatchesPage() {
                 {tournaments.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
+
+            {phases.length > 0 && (
+              <div className={styles.filterGroup}>
+                <label>Fase:</label>
+                <select 
+                  value={selectedPhase} 
+                  onChange={(e) => setSelectedPhase(e.target.value)}
+                  className={styles.select}
+                >
+                  {phases.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+            )}
 
             <div className={styles.filterGroup}>
               <label>Fecha (Jornada):</label>
