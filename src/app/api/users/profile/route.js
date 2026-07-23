@@ -59,10 +59,10 @@ export async function PATCH(request) {
 
     if (!id) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
-    // 1. Fetch current user to get old URLs and check cooldown
+    // 1. Fetch current user to get old URLs, cooldown, and password
     const { data: currentUser, error: fetchErr } = await supabase
       .from('users')
-      .select('avatar_url, cover_url, last_profile_edit')
+      .select('avatar_url, cover_url, last_profile_edit, password')
       .eq('id', id)
       .single();
 
@@ -71,6 +71,15 @@ export async function PATCH(request) {
     const updates = {};
     if (phone !== undefined) updates.phone = phone;
     if (bio !== undefined) updates.bio = bio;
+    
+    // Check Password Change
+    const { current_password, new_password } = body;
+    if (current_password && new_password) {
+      if (currentUser.password !== current_password) {
+        return NextResponse.json({ success: false, error: 'La contraseña actual es incorrecta' }, { status: 403 });
+      }
+      updates.password = new_password;
+    }
     
     // Check Cooldown for username and club
     const { username, favorite_club } = body;

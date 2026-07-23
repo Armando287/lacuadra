@@ -14,6 +14,8 @@ export default function EditProfile() {
   const [favoriteClub, setFavoriteClub] = useState('');
   const [phone, setPhone] = useState('');
   const [bio, setBio] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   
   // Upload States
   const [avatarFile, setAvatarFile] = useState(null);
@@ -105,18 +107,25 @@ export default function EditProfile() {
       }
 
       // Update Profile
+      const payload = {
+        id: userId,
+        username,
+        favorite_club: favoriteClub,
+        phone,
+        bio,
+        avatar_url: finalAvatarUrl,
+        cover_url: finalCoverUrl
+      };
+      
+      if (currentPassword && newPassword) {
+        payload.current_password = currentPassword;
+        payload.new_password = newPassword;
+      }
+
       const res = await fetch('/api/users/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: userId,
-          username,
-          favorite_club: favoriteClub,
-          phone,
-          bio,
-          avatar_url: finalAvatarUrl,
-          cover_url: finalCoverUrl
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
@@ -222,6 +231,30 @@ export default function EditProfile() {
               maxLength={150}
               placeholder="Escribe algo sobre ti..."
             />
+          </div>
+
+          <div style={{ borderTop: '1px solid #333', margin: '1.5rem 0', paddingTop: '1.5rem' }}>
+            <h3 style={{ color: '#fff', marginBottom: '1rem', fontSize: '1.1rem' }}>Cambiar Contraseña (Opcional)</h3>
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Contraseña Actual</label>
+              <input 
+                type="password" 
+                className={styles.input} 
+                value={currentPassword} 
+                onChange={e => setCurrentPassword(e.target.value)} 
+                placeholder="Solo si quieres cambiarla..."
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Nueva Contraseña</label>
+              <input 
+                type="password" 
+                className={styles.input} 
+                value={newPassword} 
+                onChange={e => setNewPassword(e.target.value)} 
+                placeholder="Escribe tu nueva contraseña"
+              />
+            </div>
           </div>
 
           {message && <div className={styles.message}>{message}</div>}
