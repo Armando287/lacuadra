@@ -17,27 +17,59 @@ export async function fetchFromSerpApi(query) {
 }
 
 function parseGoogleDate(dateStr, timeStr) {
-  // Ej: dateStr = "Sáb, 25/7", timeStr = "4:00 p. m."
   try {
     if (!dateStr) return new Date().toISOString();
-    const parts = dateStr.split(' ');
-    const dayMonth = parts[parts.length - 1]; // "25/7"
-    const [day, month] = dayMonth.split('/');
-    const year = new Date().getFullYear();
-    let d = new Date(year, parseInt(month) - 1, parseInt(day));
     
-    // Parse time if present (basic)
-    if (timeStr) {
-      const isPm = timeStr.includes('p');
-      const timeParts = timeStr.replace(/[^0-9:]/g, '').split(':');
-      let hour = parseInt(timeParts[0]);
-      const min = timeParts.length > 1 ? parseInt(timeParts[1]) : 0;
-      if (isPm && hour < 12) hour += 12;
-      if (!isPm && hour === 12) hour = 0;
-      d.setHours(hour, min, 0, 0);
+    // Paraguay time for 'today'
+    let d = new Date();
+    d = new Date(d.getTime() - (4 * 60 * 60 * 1000));
+    
+    let year = d.getUTCFullYear();
+    let month = d.getUTCMonth() + 1;
+    let day = d.getUTCDate();
+    
+    const strLower = dateStr.toLowerCase();
+    
+    if (strLower.includes("hoy") || strLower.includes("today")) {
+      // keep today
+    } else if (strLower.includes("mañana") || strLower.includes("tomorrow")) {
+      d.setUTCDate(d.getUTCDate() + 1);
+      year = d.getUTCFullYear();
+      month = d.getUTCMonth() + 1;
+      day = d.getUTCDate();
+    } else {
+      const parts = dateStr.split(' ');
+      const dayMonth = parts[parts.length - 1]; // "25/7"
+      const dmParts = dayMonth.split('/');
+      if (dmParts.length >= 2) {
+        day = parseInt(dmParts[0]);
+        month = parseInt(dmParts[1]);
+      }
     }
-    return d.toISOString();
+    
+    let hour = 12;
+    let min = 0;
+    
+    if (timeStr) {
+      const isPm = timeStr.toLowerCase().includes('p');
+      const timeParts = timeStr.replace(/[^0-9:]/g, '').split(':');
+      if (timeParts.length >= 1) {
+        let h = parseInt(timeParts[0]);
+        if (!isNaN(h)) {
+          hour = h;
+          min = timeParts.length > 1 ? parseInt(timeParts[1]) : 0;
+          if (isPm && hour < 12) hour += 12;
+          if (!isPm && hour === 12) hour = 0;
+        }
+      }
+    }
+    
+    const pad = (n) => n.toString().padStart(2, '0');
+    // Offset de Paraguay es -04:00
+    const isoString = `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(min)}:00-04:00`;
+    return new Date(isoString).toISOString();
   } catch (e) {
+    console.error("Error parsing date:", e);
     return new Date().toISOString();
   }
 }
