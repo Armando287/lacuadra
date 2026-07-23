@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from './matches.module.css';
+import Preloader from '@/components/Preloader';
 
 export default function MatchesPage() {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // Filter States
   const [selectedTournament, setSelectedTournament] = useState('');
@@ -18,10 +20,14 @@ export default function MatchesPage() {
   const [rounds, setRounds] = useState([]);
 
   useEffect(() => {
+    setLoading(true);
     fetch(`/api/matches?year=${selectedYear}`)
       .then(res => res.json())
       .then(data => {
-        if (!data.matches) return;
+        if (!data.matches) {
+          setLoading(false);
+          return;
+        }
         setMatches(data.matches);
         
         // Extract unique tournaments
@@ -30,7 +36,9 @@ export default function MatchesPage() {
         if (t.length > 0 && !t.includes(selectedTournament)) {
           setSelectedTournament(t[0]);
         }
-      });
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [selectedYear]);
 
   // When tournament changes, extract rounds and set active round
@@ -81,7 +89,7 @@ export default function MatchesPage() {
       <h1 className={styles.title}>Centro de Partidos</h1>
       
       {/* Filter Bar */}
-      <div className={`glass-panel ${styles.filterBar}`}>
+      <div className={styles.filterBar}>
         <div className={styles.filterGroup}>
           <label>Temporada:</label>
           <select 
@@ -101,6 +109,7 @@ export default function MatchesPage() {
             value={selectedTournament} 
             onChange={(e) => setSelectedTournament(e.target.value)}
             className={styles.select}
+            disabled={tournaments.length === 0}
           >
             {tournaments.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
@@ -112,55 +121,60 @@ export default function MatchesPage() {
             value={selectedRound} 
             onChange={(e) => setSelectedRound(e.target.value)}
             className={styles.select}
+            disabled={rounds.length === 0}
           >
             {rounds.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
       </div>
       
-      <div className={styles.grid}>
-        {filteredMatches.map(match => (
-          <Link href={`/matches/${match.id}?active=${isRoundActive}`} key={match.id}>
-            <div className={`glass-panel animate-fade-in ${styles.card}`}>
-              <div className={styles.cardContent}>
-                <div className={styles.header}>
-                  <span className={styles.tournament}>{match.round || match.tournament}</span>
-                  <span className={`${styles.status} ${styles[match.status]}`}>
-                    {match.status === 'live' && <span className="status-dot live"></span>}
-                    {match.status === 'live' ? 'EN VIVO' : 
-                     match.status === 'finished' ? 'FINALIZADO' : 'PRÓXIMO'}
-                  </span>
-                </div>
-                
-                <div className={styles.teams}>
-                  <div className={styles.team}>
-                    <div className={styles.avatar}>
-                      {match.homeLogo ? <img src={match.homeLogo} alt={match.homeTeam} className={styles.avatarImg} /> : null}
+      {loading ? (
+        <Preloader text="CARGANDO PARTIDOS..." />
+      ) : (
+        <div className={styles.grid}>
+          {filteredMatches.map(match => (
+            <Link href={`/matches/${match.id}?active=${isRoundActive}`} key={match.id}>
+              <div className={`glass-panel animate-fade-in ${styles.card}`}>
+                <div className={styles.cardContent}>
+                  <div className={styles.header}>
+                    <span className={styles.tournament}>{match.round || match.tournament}</span>
+                    <span className={`${styles.status} ${styles[match.status]}`}>
+                      {match.status === 'live' && <span className="status-dot live"></span>}
+                      {match.status === 'live' ? 'EN VIVO' : 
+                       match.status === 'finished' ? 'FINALIZADO' : 'PRÓXIMO'}
+                    </span>
+                  </div>
+                  
+                  <div className={styles.teams}>
+                    <div className={styles.team}>
+                      <div className={styles.avatar}>
+                        {match.homeLogo ? <img src={match.homeLogo} alt={match.homeTeam} className={styles.avatarImg} /> : null}
+                      </div>
+                      <span>{match.homeTeam}</span>
                     </div>
-                    <span>{match.homeTeam}</span>
-                  </div>
-                  <div className={styles.score}>
-                    {match.scoreHome !== null ? `${match.scoreHome} - ${match.scoreAway}` : <span className={styles.vs}>VS</span>}
-                  </div>
-                  <div className={styles.team}>
-                    <div className={styles.avatar}>
-                      {match.awayLogo ? <img src={match.awayLogo} alt={match.awayTeam} className={styles.avatarImg} /> : null}
+                    <div className={styles.score}>
+                      {match.scoreHome !== null ? `${match.scoreHome} - ${match.scoreAway}` : <span className={styles.vs}>VS</span>}
                     </div>
-                    <span>{match.awayTeam}</span>
+                    <div className={styles.team}>
+                      <div className={styles.avatar}>
+                        {match.awayLogo ? <img src={match.awayLogo} alt={match.awayTeam} className={styles.avatarImg} /> : null}
+                      </div>
+                      <span>{match.awayTeam}</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className={styles.footer}>
-                  <span>{new Date(match.date).toLocaleString()}</span>
+                  <div className={styles.footer}>
+                    <span>{new Date(match.date).toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        ))}
-        {filteredMatches.length === 0 && (
-          <div className={styles.noMatches}>No hay partidos programados para esta fecha.</div>
-        )}
-      </div>
+            </Link>
+          ))}
+          {filteredMatches.length === 0 && (
+            <div className={styles.noMatches}>No hay partidos programados para esta fecha.</div>
+          )}
+        </div>
+      )}
     </main>
   );
 }

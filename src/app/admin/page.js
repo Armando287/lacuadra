@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './admin.module.css';
+import Preloader from '@/components/Preloader';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -181,7 +182,7 @@ export default function AdminPage() {
 
   const [activeTab, setActiveTab] = useState('sync');
 
-  if (loading) return <div style={{ color: 'white', textAlign: 'center', marginTop: '5rem' }}>Cargando Panel Admin...</div>;
+  if (loading) return <Preloader text="CARGANDO PANEL..." />;
 
   return (
     <main className={styles.layout}>
