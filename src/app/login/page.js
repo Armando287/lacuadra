@@ -4,18 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './login.module.css';
 
-const CLUBS = [
-  "Cerro Porteño", "Olimpia", "Libertad", "Guaraní", 
-  "Nacional Asuncion", "Sportivo Luqueño", "Sportivo Ameliano", 
-  "Sportivo Trinidense", "Tacuary", "Sol de América", 
-  "2 de Mayo", "General Caballero JLM"
-];
-
 export default function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [favoriteClub, setFavoriteClub] = useState(CLUBS[0]);
+  const [favoriteClub, setFavoriteClub] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -36,6 +29,11 @@ export default function Login() {
     if (data.success) {
       localStorage.setItem('user_token', data.user.id);
       localStorage.setItem('user_name', data.user.username);
+      if (data.user.is_admin) {
+        localStorage.setItem('user_is_admin', 'true');
+      } else {
+        localStorage.removeItem('user_is_admin');
+      }
       router.push('/matches');
     } else {
       setError(data.error || 'Ocurrió un error');
@@ -88,14 +86,14 @@ export default function Login() {
           {isRegistering && (
             <div className={styles.inputGroup}>
               <label>Tu Club (Batalla de Hinchadas)</label>
-              <select 
+              <input 
+                type="text"
                 className={styles.input}
                 value={favoriteClub}
                 onChange={e => setFavoriteClub(e.target.value)}
+                placeholder="Ej. Olimpia, Cerro Porteño..."
                 required
-              >
-                {CLUBS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              />
             </div>
           )}
 

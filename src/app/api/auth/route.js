@@ -46,6 +46,9 @@ export async function POST(request) {
       }
 
       const user = users[0];
+      if (user.is_banned) {
+        return NextResponse.json({ success: false, error: 'Tu cuenta ha sido suspendida.' });
+      }
       if (user.password === password) {
         const { password: _, ...userWithoutPassword } = user;
         return NextResponse.json({ success: true, user: userWithoutPassword });

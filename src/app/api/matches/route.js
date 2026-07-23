@@ -8,22 +8,37 @@ export async function GET(request) {
     const yearParam = searchParams.get('year');
     const targetYear = yearParam ? parseInt(yearParam) : new Date().getFullYear();
 
-    // 1. Obtener datos desde Google Sports (SerpApi)
-    const apiMatches = await getGoogleMatches();
-    if (apiMatches && apiMatches.length > 0) {
-      return NextResponse.json({ matches: apiMatches });
-    }
-
-    // 2. Intentar Supabase (Cached/Saved)
-    const { data: matches, error } = await supabase.from('matches').select('*');
-    if (!error && matches && matches.length > 0) {
-      return NextResponse.json({ matches });
+    const { data: dbMatches, error } = await supabase.from('matches').select('*');
+    if (error) throw error;
+    
+    if (dbMatches) {
+      // Map database snake_case to frontend camelCase
+      const matches = dbMatches.map(m => ({
+        id: m.id,
+        homeTeam: m.home_team,
+        awayTeam: m.away_team,
+        tournament: m.tournament,
+        round: m.round,
+        date: m.match_date,
+        status: m.status,
+        scoreHome: m.score_home,
+        scoreAway: m.score_away,
+        homeLogo: m.home_logo,
+        awayLogo: m.away_logo,
+        stadium: m.stadium,
+        events: m.events || [],
+        lineupHome: m.lineup_home || [],
+        lineupAway: m.lineup_away || []
+      }));
+      
+      // Optionally filter by year if needed
+      const filteredMatches = matches.filter(m => new Date(m.date).getFullYear() === targetYear);
+      return NextResponse.json({ matches: filteredMatches });
     }
   } catch (e) {
     console.error(e);
   }
 
-  // Fallback seguro: devolver array vacío para no mostrar partidos inventados
   return NextResponse.json({ matches: [] });
 }
 
