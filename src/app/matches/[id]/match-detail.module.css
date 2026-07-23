@@ -245,3 +245,62 @@
   font-size: 0.9rem;
   color: var(--text-main);
 }
+
+@media (max-width: 768px) {
+  .main {
+    padding: 6rem 1rem 2rem 1rem;
+  }
+  
+  .teams {
+    gap: 0.5rem;
+  }
+  
+  .logoLg {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .score {
+    font-size: 3rem;
+  }
+  
+  .team h2 {
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  .voteInputs {
+    width: 100%;
+    justify-content: center;
+    gap: 1.5rem;
+    background: transparent;
+    padding: 1rem 0;
+  }
+  
+  .inputGroup input {
+    width: 100px;
+    height: 120px;
+    font-size: 4rem;
+    border-radius: 20px;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .inputGroup input:focus {
+    transform: scale(1.05);
+    box-shadow: 0 15px 35px rgba(0, 245, 118, 0.3), inset 0 2px 0 rgba(0, 245, 118, 0.5);
+    background: rgba(0, 245, 118, 0.05);
+  }
+  
+  .inputGroup label {
+    font-size: 0.9rem;
+  }
+  
+  .voteForm .btn-primary {
+    width: 100%;
+    padding: 1.2rem;
+    font-size: 1.2rem;
+    border-radius: 16px;
+  }
+}

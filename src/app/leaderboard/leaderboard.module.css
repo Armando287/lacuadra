@@ -257,14 +257,38 @@
     font-size: 2.2rem;
   }
   
+  .tabsContainer {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.5rem;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .tabsContainer::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .tabBtn {
+    flex: 0 0 auto;
+    font-size: 0.85rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+  }
+  
   .tableContainer {
     padding: 1rem;
+    border-radius: 16px;
   }
 
   .row {
     flex-direction: column;
     align-items: flex-start;
     gap: 1.5rem;
+    padding: 1.2rem;
   }
   .rightCol {
     width: 100%;

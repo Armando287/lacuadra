@@ -100,48 +100,72 @@
   .links {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
+    right: -100%;
+    width: 280px;
     height: 100vh;
-    background: rgba(10, 10, 15, 0.95);
-    backdrop-filter: blur(20px);
+    background: rgba(15, 15, 20, 0.98);
+    backdrop-filter: blur(25px);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    transform: translateY(-100%);
-    opacity: 0;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 6rem 2rem 2rem;
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
   }
   
   .links.mobileOpen {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: all;
+    right: 0;
   }
   
   .links a:not(.btn-primary) {
-    font-size: 1.5rem;
-    margin: 10px 0;
+    font-size: 1.2rem;
+    margin: 12px 0;
+    width: 100%;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 12px;
+  }
+
+  .active::after {
+    display: none;
+  }
+  
+  .active {
+    color: var(--accent) !important;
+    font-weight: 800;
   }
   
   .searchForm {
     margin-left: 0;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    width: 100%;
   }
   
   .searchInput {
-    width: 250px;
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
   }
   
   .searchInput:focus {
-    width: 280px;
+    width: 100%;
   }
   
   .authGroup {
     flex-direction: column;
-    margin-top: 1rem;
+    align-items: flex-start;
+    margin-top: auto;
+    width: 100%;
+    gap: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  
+  .authGroup .btn-primary {
+    width: 100%;
+    text-align: center;
   }
   
   /* Hamburger Animation */

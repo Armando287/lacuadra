@@ -213,9 +213,54 @@
 
 /* Mobile Adjustments */
 @media (max-width: 768px) {
-  .floatCard { display: none; } /* Hide 3D cards on mobile to avoid clutter */
-  .massiveTitle { font-size: 3.5rem; }
-  .heroDescription { font-size: 1rem; padding: 0 1rem; }
+  .floatCard { display: none; }
+  
+  .heroCenter {
+    padding: 0 1.5rem;
+    margin-top: -10vh;
+  }
+  
+  .badge {
+    font-size: 0.75rem;
+    padding: 8px 14px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .massiveTitle { 
+    font-size: 3.5rem; 
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+  
+  .heroDescription { 
+    font-size: 1.05rem; 
+    padding: 0; 
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+  
+  .ctaGroup {
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+  }
+  
+  .ctaGroup a {
+    width: 100%;
+    text-align: center;
+    padding: 1.2rem;
+    font-size: 1.1rem;
+    border-radius: 16px; /* App-like buttons */
+  }
+  
+  .tickerWrapper {
+    padding: 10px 0;
+  }
+  
+  .tickerItem {
+    padding: 0 15px;
+    font-size: 0.85rem;
+  }
   
   /* Mobile panning animation for background */
   .stadiumBg {

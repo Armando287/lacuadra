@@ -254,10 +254,24 @@
   }
   
   .filterBar {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     padding: 1rem;
     gap: 1rem;
     align-items: stretch;
+    border-radius: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .filterBar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .filterGroup {
+    flex: 0 0 auto;
+    min-width: 150px;
   }
   
   .score {
