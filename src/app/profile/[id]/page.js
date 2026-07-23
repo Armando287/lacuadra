@@ -1,22 +1,26 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from './profile.module.css';
 
-export default function PublicProfile({ params }) {
+export default function PublicProfile() {
+  const params = useParams();
   const profileId = params.id;
   const [currentUserId, setCurrentUserId] = useState(null);
   
   const [profile, setProfile] = useState(null);
   const [friendships, setFriendships] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [debugMsg, setDebugMsg] = useState("");
 
   useEffect(() => {
     const loggedInId = localStorage.getItem('user_token');
     setCurrentUserId(loggedInId);
-    fetchData();
+    if (profileId) {
+      fetchData();
+    }
   }, [profileId]);
 
   const fetchData = async () => {
@@ -29,11 +33,21 @@ export default function PublicProfile({ params }) {
       const profileData = await profileRes.json();
       const friendsData = await friendsRes.json();
 
-      if (profileData.success) setProfile(profileData.user);
-      if (friendsData.success) setFriendships(friendsData.friendships);
+      if (profileData.success) {
+        setProfile(profileData.user);
+      } else {
+        setDebugMsg(`Profile API Error: ${profileData.error}`);
+      }
+      
+      if (friendsData.success) {
+        setFriendships(friendsData.friendships);
+      } else {
+        console.error("Friends error:", friendsData.error);
+      }
       
     } catch (error) {
       console.error(error);
+      setDebugMsg(`Fetch Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -67,7 +81,12 @@ export default function PublicProfile({ params }) {
   };
 
   if (loading) return <div style={{ color: 'white', textAlign: 'center', marginTop: '5rem' }}>Cargando Perfil...</div>;
-  if (!profile) return <div style={{ color: 'white', textAlign: 'center', marginTop: '5rem' }}>Usuario no encontrado.</div>;
+  if (!profile) return (
+    <div style={{ color: 'white', textAlign: 'center', marginTop: '5rem' }}>
+      <h2>Usuario no encontrado.</h2>
+      <p style={{ color: '#ff4444', marginTop: '1rem' }}>{debugMsg}</p>
+    </div>
+  );
 
   const isOwnProfile = currentUserId == profileId;
 
