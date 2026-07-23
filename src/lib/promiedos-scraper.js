@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import { getTeamLogoUrl } from './team-logos.js';
 
 const PROMIEDOS_URL = 'https://www.promiedos.com.ar/league/copa-de-primera/gcb';
 const HEADERS = {
@@ -55,8 +56,8 @@ function parseGames(games, roundName) {
       status: mapStatus(game.status?.name),
       scoreHome,
       scoreAway,
-      homeLogo: homeTeam.id ? `https://api.promiedos.com.ar/images/team/${homeTeam.id}/1` : '',
-      awayLogo: awayTeam.id ? `https://api.promiedos.com.ar/images/team/${awayTeam.id}/1` : '',
+      homeLogo: getTeamLogoUrl(homeTeam.name),
+      awayLogo: getTeamLogoUrl(awayTeam.name),
       stadium: '',
       events: [],
       lineupHome: [],

@@ -95,7 +95,7 @@ export default function MatchDetail() {
         <div className={styles.teams}>
           <div className={styles.team}>
             <div className={styles.logoLg}>
-              {(() => { const url = match.homeLogo || getTeamLogoUrl(match.homeTeam); return url ? <img src={url.endsWith('/1') ? url : url + '/1'} alt={match.homeTeam} className={styles.logoImg} /> : null; })()}
+              {(match.homeLogo || getTeamLogoUrl(match.homeTeam)) && <img src={match.homeLogo || getTeamLogoUrl(match.homeTeam)} alt={match.homeTeam} className={styles.logoImg} />}
             </div>
             <h2>{match.homeTeam}</h2>
           </div>
@@ -110,7 +110,7 @@ export default function MatchDetail() {
           </div>
           <div className={styles.team}>
             <div className={styles.logoLg}>
-              {(() => { const url = match.awayLogo || getTeamLogoUrl(match.awayTeam); return url ? <img src={url.endsWith('/1') ? url : url + '/1'} alt={match.awayTeam} className={styles.logoImg} /> : null; })()}
+              {(match.awayLogo || getTeamLogoUrl(match.awayTeam)) && <img src={match.awayLogo || getTeamLogoUrl(match.awayTeam)} alt={match.awayTeam} className={styles.logoImg} />}
             </div>
             <h2>{match.awayTeam}</h2>
           </div>
