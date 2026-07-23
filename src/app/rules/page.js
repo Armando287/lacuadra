@@ -9,7 +9,7 @@ export default function RulesPage() {
       <p className={styles.subtitle}>Participá pronosticando los resultados de los partidos y demostrá que sos el que más sabe.</p>
 
       <div className={styles.grid}>
-        <div className={`glass-panel ${styles.ruleSection}`}>
+        <div className={styles.ruleSection}>
           <h2>🎯 Sistema de Puntos</h2>
           <p>Cada pronóstico otorga puntos según el resultado final del partido.</p>
           
@@ -59,7 +59,7 @@ export default function RulesPage() {
         </div>
 
         <div className={styles.rightColumn}>
-          <div className={`glass-panel ${styles.ruleSection}`}>
+          <div className={styles.ruleSection}>
             <h2>⏰ ¿Hasta cuándo puedo pronosticar?</h2>
             <div className={styles.infoBox}>
               <span className={styles.icon}>🔒</span>
@@ -67,7 +67,7 @@ export default function RulesPage() {
             </div>
           </div>
 
-          <div className={`glass-panel ${styles.ruleSection}`}>
+          <div className={styles.ruleSection}>
             <h2>📅 Ranking por Fecha (Jornada)</h2>
             <ul className={styles.list}>
               <li>Cada jornada tiene su propia clasificación.</li>
@@ -78,7 +78,7 @@ export default function RulesPage() {
             </ul>
           </div>
 
-          <div className={`glass-panel ${styles.ruleSection}`}>
+          <div className={styles.ruleSection}>
             <h2>🏆 Campeón y Subcampeón</h2>
             <p>Podés predecir el resultado del torneo a largo plazo.</p>
             <div className={styles.championBox}>

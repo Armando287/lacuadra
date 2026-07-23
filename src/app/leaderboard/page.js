@@ -31,32 +31,18 @@ export default function Leaderboard() {
         else if (index === 2) { positionClass = styles.bronze; badgeClass = styles.bronzeBadge; badgeText = '3º'; }
 
         return (
-          <div key={user.id} className={`${styles.row} ${index < 3 ? styles.topRow : ''}`}>
-            <div className={styles.leftCol}>
-              <span className={`${styles.position} ${positionClass}`}>{index + 1}</span>
-              <div className={styles.userCell}>
-                <img src={user.avatarUrl} alt={user.username} className={styles.avatar} />
-                <div>
-                  <span className={styles.username}>{user.username}</span>
-                  {user.club && <div className={styles.clubName}>{user.club}</div>}
-                </div>
-              </div>
+          <div key={user.id} className={styles.row}>
+            <div className={styles.userCell}>
+              <img src={user.avatarUrl} alt={user.username} className={styles.avatar} />
+              <span className={styles.username}>{user.username}</span>
             </div>
             
-            <div className={styles.statsCol}>
-              <div className={styles.statItem}>
-                <span>Fechas Ganadas</span>
-                <strong>{user.roundWins}</strong>
-              </div>
-              <div className={styles.statItem}>
-                <span>Resultados Exactos</span>
-                <strong>{user.exactHits}</strong>
-              </div>
+            <div className={styles.clubCell}>
+              {user.club ? user.club : '-'}
             </div>
 
-            <div className={styles.rightCol}>
-              {badgeText && <span className={`${styles.badge} ${badgeClass}`}>{badgeText}</span>}
-              <span className={styles.points}>{user.points} <small>pts</small></span>
+            <div className={styles.pointsCell}>
+              {user.points}
             </div>
           </div>
         );
@@ -79,17 +65,18 @@ export default function Leaderboard() {
         </div>
         <div className={styles.list}>
           {users.map((user, index) => (
-            <div key={user.id} className={`${styles.row} ${user.isWinner ? styles.topRow : ''}`}>
-              <div className={styles.leftCol}>
-                <span className={styles.position}>{index + 1}</span>
-                <div className={styles.userCell}>
-                  <img src={user.avatarUrl} alt={user.username} className={styles.avatar} />
-                  <span className={styles.username}>{user.username}</span>
-                </div>
+            <div key={user.id} className={styles.row}>
+              <div className={styles.userCell}>
+                <img src={user.avatarUrl} alt={user.username} className={styles.avatar} />
+                <span className={styles.username}>{user.username}</span>
               </div>
-              <div className={styles.rightCol}>
-                {user.isWinner && <span className={`${styles.badge} ${styles.goldBadge}`}>GANADOR (+5)</span>}
-                <span className={styles.points}>{user.points} <small>pts</small></span>
+              
+              <div className={styles.clubCell}>
+                 {user.isWinner ? 'GANADOR (+5)' : '-'}
+              </div>
+
+              <div className={styles.pointsCell}>
+                {user.points}
               </div>
             </div>
           ))}
@@ -101,16 +88,17 @@ export default function Leaderboard() {
   const renderFans = () => (
     <div className={styles.list}>
       {data.fans.map((fan, index) => (
-        <div key={fan.club} className={`${styles.row} ${index === 0 ? styles.topRow : ''}`}>
-          <div className={styles.leftCol}>
-            <span className={`${styles.position} ${index === 0 ? styles.gold : ''}`}>{index + 1}</span>
-            <div className={styles.userCell}>
-              <span className={styles.username}>{fan.club}</span>
-            </div>
+        <div key={fan.club} className={styles.row}>
+          <div className={styles.userCell}>
+            <span className={styles.username}>{fan.club}</span>
           </div>
-          <div className={styles.rightCol}>
-            {index === 0 && <span className={`${styles.badge} ${styles.goldBadge}`}>LÍDER</span>}
-            <span className={styles.points}>{fan.points} <small>pts</small></span>
+          
+          <div className={styles.clubCell}>
+             {index === 0 ? 'LÍDER' : '-'}
+          </div>
+
+          <div className={styles.pointsCell}>
+            {fan.points}
           </div>
         </div>
       ))}

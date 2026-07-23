@@ -22,136 +22,58 @@
 }
 
 .tableContainer {
-  background: rgba(15, 23, 42, 0.5);
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 2rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  padding: 0;
+  width: 100%;
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
 .row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-lg);
-  transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
-}
-
-.row:hover {
-  transform: translateX(10px) scale(1.02);
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(0, 245, 118, 0.3);
-}
-
-.topRow {
-  background: linear-gradient(90deg, rgba(0, 245, 118, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border-left: 4px solid var(--primary-color);
-}
-
-.leftCol {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.position {
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: var(--text-muted);
-  width: 40px;
-  text-align: center;
-  font-family: var(--font-display);
-}
-
-.gold {
-  color: #fbbf24;
-  text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
-  font-size: 2rem;
-}
-
-.silver {
-  color: #94a3b8;
-  text-shadow: 0 0 15px rgba(148, 163, 184, 0.5);
-  font-size: 1.8rem;
-}
-
-.bronze {
-  color: #b45309;
-  text-shadow: 0 0 15px rgba(180, 83, 9, 0.5);
-  font-size: 1.6rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: transparent;
+  border-radius: 0;
 }
 
 .userCell {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex: 2;
 }
 
 .avatar {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
 }
 
 .username {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 500;
   color: var(--text-light);
 }
 
-.rightCol {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.points {
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--primary-color);
-  font-family: var(--font-display);
-  text-shadow: 0 0 20px rgba(0, 245, 118, 0.3);
-}
-
-.badge {
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.85rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: rgba(255, 255, 255, 0.1);
+.clubCell {
+  flex: 1;
+  text-align: left;
+  font-size: 0.9rem;
   color: var(--text-light);
 }
 
-.goldBadge {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.3);
-}
-
-.silverBadge {
-  background: rgba(148, 163, 184, 0.15);
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-}
-
-.bronzeBadge {
-  background: rgba(180, 83, 9, 0.15);
-  color: #b45309;
-  border: 1px solid rgba(180, 83, 9, 0.3);
+.pointsCell {
+  flex: 1;
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-light);
 }
 
 /* Tabs and new UI */

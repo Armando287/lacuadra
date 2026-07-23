@@ -45,16 +45,13 @@ function SearchResults() {
       ) : users.length > 0 ? (
         <div className={styles.userGrid}>
           {users.map(user => (
-            <div key={user.id} className={`glass-panel ${styles.userCard}`}>
+            <Link href={`/profile/${user.id}`} key={user.id} className={styles.userRow}>
               <img src={user.avatar_url || '/logo.png'} alt={user.username} className={styles.avatar} />
               <div className={styles.userInfo}>
                 <h3>{user.username}</h3>
                 {user.bio && <p className={styles.bio}>{user.bio.substring(0, 50)}...</p>}
               </div>
-              <Link href={`/profile/${user.id}`} className="btn-primary">
-                Ver Perfil
-              </Link>
-            </div>
+            </Link>
           ))}
         </div>
       ) : (
