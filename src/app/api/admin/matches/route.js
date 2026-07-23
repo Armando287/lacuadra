@@ -22,19 +22,18 @@ export async function POST(request) {
       const apiMatches = await getGoogleMatches();
       
       let matchesToInsert = apiMatches;
-      if (round) matchesToInsert = matchesToInsert.filter(m => m.round === round || m.round.includes(round));
-      if (tournament) matchesToInsert = matchesToInsert.filter(m => m.tournament === tournament || m.tournament.includes(tournament));
 
       if (matchesToInsert.length === 0) {
-        return NextResponse.json({ success: false, error: 'No se encontraron partidos para esa fecha/torneo en Google.' });
+        return NextResponse.json({ success: false, error: 'No se encontraron partidos en Google.' });
       }
 
       const dbPayload = matchesToInsert.map(m => ({
         id: m.id,
         home_team: m.homeTeam,
         away_team: m.awayTeam,
-        tournament: m.tournament,
-        round: m.round,
+        // Overrides the scraped values with the ones typed by the admin
+        tournament: tournament || m.tournament,
+        round: round || m.round,
         match_date: m.date,
         status: m.status,
         score_home: m.scoreHome,
