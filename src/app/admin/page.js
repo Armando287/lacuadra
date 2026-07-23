@@ -19,6 +19,7 @@ export default function AdminPage() {
 
   // States for Manual Matches Manager
   const [dbMatches, setDbMatches] = useState([]);
+  const [filterRound, setFilterRound] = useState('');
   const [editingMatchId, setEditingMatchId] = useState(null);
   const [manualMatch, setManualMatch] = useState({
     home_team: '', away_team: '', score_home: '', score_away: '', 
@@ -338,6 +339,23 @@ export default function AdminPage() {
               </div>
               
               <div className={styles.tableContainer}>
+                
+                {/* FILTRO DE FECHAS */}
+                <div style={{ padding: '1rem', background: '#25262b', borderBottom: '1px solid #2C2D33', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <strong style={{ color: '#ccc' }}>Filtrar por Jornada:</strong>
+                  <select 
+                    className={styles.input} 
+                    style={{ maxWidth: '200px', marginBottom: 0 }} 
+                    value={filterRound} 
+                    onChange={e => setFilterRound(e.target.value)}
+                  >
+                    <option value="">Todos los partidos</option>
+                    {[...new Set(dbMatches.map(m => m.round))].filter(Boolean).map(round => (
+                      <option key={round} value={round}>{round}</option>
+                    ))}
+                  </select>
+                </div>
+
                 <table className={styles.table}>
                   <thead>
                     <tr>
@@ -349,7 +367,7 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {dbMatches.map(m => (
+                    {dbMatches.filter(m => filterRound === '' || m.round === filterRound).map(m => (
                       <tr key={m.id}>
                         <td>{new Date(m.match_date).toLocaleString()}</td>
                         <td>
@@ -365,8 +383,8 @@ export default function AdminPage() {
                         </td>
                       </tr>
                     ))}
-                    {dbMatches.length === 0 && (
-                      <tr><td colSpan="5" style={{ textAlign: 'center' }}>No hay partidos en la base de datos.</td></tr>
+                    {dbMatches.filter(m => filterRound === '' || m.round === filterRound).length === 0 && (
+                      <tr><td colSpan="5" style={{ textAlign: 'center' }}>No hay partidos que coincidan con el filtro.</td></tr>
                     )}
                   </tbody>
                 </table>
