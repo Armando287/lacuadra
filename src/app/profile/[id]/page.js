@@ -331,6 +331,15 @@ export default function PublicProfile() {
           <div className={styles.muroContainer}>
             {/* Create Post Box */}
             {isOwnProfile && (
+              profile.banned_until && new Date(profile.banned_until) > new Date() ? (
+                <div className={`glass-panel`} style={{ padding: '1.5rem', textAlign: 'center', marginBottom: '1.5rem', border: '1px solid #ff4444' }}>
+                  <h3 style={{ color: '#ff4444', marginBottom: '0.5rem' }}>⛔ Has sido suspendido temporalmente</h3>
+                  <p style={{ color: '#ccc', fontSize: '0.9rem' }}>
+                    El Bot de Seguridad detectó actividad inusual. Podrás volver a publicar el: <br/>
+                    <strong>{new Date(profile.banned_until).toLocaleString()}</strong>
+                  </p>
+                </div>
+              ) : (
               <form className={`glass-panel ${styles.createPostBox}`} onSubmit={handleCreatePost}>
                 <div className={styles.createPostInputWrapper}>
                   <img src={profile.avatar_url || '/logo.png'} className={styles.smallAvatar} />
@@ -365,6 +374,7 @@ export default function PublicProfile() {
                   </button>
                 </div>
               </form>
+              )
             )}
 
             {/* Posts Feed */}

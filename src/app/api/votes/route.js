@@ -23,6 +23,20 @@ export async function POST(request) {
   try {
     const { userId, matchId, predictedScoreHome, predictedScoreAway } = await request.json();
     
+    // Check ban status
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('banned_until')
+      .eq('id', userId)
+      .single();
+
+    if (!userError && user?.banned_until) {
+      const banDate = new Date(user.banned_until);
+      if (banDate > new Date()) {
+        return NextResponse.json({ success: false, error: `Estás baneado hasta ${banDate.toLocaleString()}` }, { status: 403 });
+      }
+    }
+
     const { data: existingVote, error } = await supabase
       .from('votes')
       .select('*')

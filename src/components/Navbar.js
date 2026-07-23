@@ -11,6 +11,7 @@ export default function Navbar() {
   const [username, setUsername] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [userAvatar, setUserAvatar] = useState(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
   
@@ -40,12 +41,18 @@ export default function Navbar() {
 
   const fetchNotifications = async (id) => {
     try {
-      const [notifRes, friendRes] = await Promise.all([
+      const [notifRes, friendRes, profileRes] = await Promise.all([
         fetch(`/api/notifications?userId=${id}`),
-        fetch(`/api/friends?userId=${id}`)
+        fetch(`/api/friends?userId=${id}`),
+        fetch(`/api/users/profile?id=${id}`)
       ]);
       const notifData = await notifRes.json();
       const friendData = await friendRes.json();
+      const profileData = await profileRes.json();
+
+      if (profileData.success) {
+        setUserAvatar(profileData.user.avatar_url);
+      }
 
       if (notifData.success) {
         setNotifications(notifData.notifications);
@@ -211,8 +218,9 @@ export default function Navbar() {
                 )}
               </div>
 
-              <Link href={`/profile/${userId}`} style={{ color: '#fff', fontWeight: 'bold', textDecoration: 'none' }} className={styles.profileLink}>
-                👤 {username}
+              <Link href={`/profile/${userId}`} style={{ color: '#fff', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }} className={styles.profileLink}>
+                <img src={userAvatar || '/logo.png'} alt="Avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                {username}
               </Link>
               <button onClick={handleLogout} className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)', padding: '0.5rem 1rem' }}>
                 Salir
