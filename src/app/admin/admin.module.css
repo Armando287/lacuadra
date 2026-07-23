@@ -4,7 +4,7 @@
   max-width: 1400px;
   margin: 0 auto;
   gap: 2rem;
-  padding: 2rem;
+  padding: 6rem 2rem 2rem 2rem; /* Increased top padding to clear fixed navbar */
   animation: fadeIn 0.3s ease;
 }
 
