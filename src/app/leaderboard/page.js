@@ -121,8 +121,12 @@ export default function Leaderboard() {
             <span className={styles.username}>{fan.club}</span>
           </div>
           
-          <div className={styles.colClub}>
-             {index === 0 ? '🏆 LÍDER' : '-'}
+          <div className={styles.colClub} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+             {index === 0 && <span style={{ fontSize: '1.2rem' }}>🏆</span>}
+             {fan.leaderAvatar && <img src={fan.leaderAvatar} alt={fan.leaderName} className={styles.avatar} style={{ width: '25px', height: '25px' }} />}
+             <span style={{ fontSize: '0.85rem', color: index === 0 ? 'var(--primary-color)' : 'var(--text-light)', fontWeight: index === 0 ? 'bold' : 'normal' }}>
+               {fan.leaderName || 'Sin Lider'}
+             </span>
           </div>
 
           <div className={styles.colPts}>

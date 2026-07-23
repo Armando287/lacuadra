@@ -98,15 +98,31 @@ export async function GET(request) {
 
     // 2. Fans Battle Leaderboard
     const fansBattle = {};
+    const clubLeaders = {};
+
     Object.values(userStats).forEach(u => {
       const club = u.favoriteClub || 'Sin Club';
-      if (!fansBattle[club]) fansBattle[club] = 0;
+      if (!fansBattle[club]) {
+        fansBattle[club] = 0;
+        clubLeaders[club] = u; // initially set first user as leader
+      }
+      
       fansBattle[club] += u.totalPoints;
+      
+      // Update leader if this user has more points than the current leader of this club
+      if (u.totalPoints > clubLeaders[club].totalPoints) {
+        clubLeaders[club] = u;
+      }
     });
 
     const fansLeaderboard = Object.entries(fansBattle)
       .filter(([club, _]) => club !== 'Sin Club' && club !== '-')
-      .map(([club, points]) => ({ club, points }))
+      .map(([club, points]) => ({ 
+        club, 
+        points,
+        leaderName: clubLeaders[club].username,
+        leaderAvatar: clubLeaders[club].avatarUrl
+      }))
       .sort((a, b) => b.points - a.points);
 
     // 3. Round Leaderboards
