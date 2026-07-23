@@ -128,7 +128,10 @@ export async function getGoogleMatches() {
       scoreAway: awayTeam.score ? parseInt(awayTeam.score) : null,
       homeLogo: logoMap[homeTeam.name] || getFallbackLogo(homeTeam.name) || homeTeam.thumbnail || "",
       awayLogo: logoMap[awayTeam.name] || getFallbackLogo(awayTeam.name) || awayTeam.thumbnail || "",
-      stadium: game.lugar || "Estadio Local"
+      stadium: game.lugar || "Estadio Local",
+      lineupHome: [],
+      lineupAway: [],
+      events: []
     };
   });
 }

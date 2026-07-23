@@ -154,13 +154,13 @@ export default function MatchDetail() {
               <div className={styles.lineup}>
                 <h4>{match.homeTeam}</h4>
                 <ul>
-                  {match.lineupHome.map((p, i) => <li key={i}>{p}</li>)}
+                  {match.lineupHome?.map((p, i) => <li key={i}>{p}</li>) || <li>No disponible</li>}
                 </ul>
               </div>
               <div className={styles.lineup}>
                 <h4>{match.awayTeam}</h4>
                 <ul>
-                  {match.lineupAway.map((p, i) => <li key={i}>{p}</li>)}
+                  {match.lineupAway?.map((p, i) => <li key={i}>{p}</li>) || <li>No disponible</li>}
                 </ul>
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function MatchDetail() {
           <div className={`glass-panel ${styles.timelinePanel}`}>
             <h3 className={styles.panelTitle}>Eventos en Vivo</h3>
             <div className={styles.timeline}>
-              {match.events.length === 0 ? (
+              {!match.events || match.events.length === 0 ? (
                 <p>No hay eventos registrados aún.</p>
               ) : (
                 match.events.map((ev, i) => (
