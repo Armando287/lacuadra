@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import styles from './match-detail.module.css';
 import Preloader from '@/components/Preloader';
+import { getTeamLogoUrl } from '@/lib/team-logos';
 
 export default function MatchDetail() {
   const params = useParams();
@@ -94,7 +95,7 @@ export default function MatchDetail() {
         <div className={styles.teams}>
           <div className={styles.team}>
             <div className={styles.logoLg}>
-              {match.homeLogo && <img src={match.homeLogo} alt={match.homeTeam} className={styles.logoImg} />}
+              {(() => { const url = match.homeLogo || getTeamLogoUrl(match.homeTeam); return url ? <img src={url.endsWith('/1') ? url : url + '/1'} alt={match.homeTeam} className={styles.logoImg} /> : null; })()}
             </div>
             <h2>{match.homeTeam}</h2>
           </div>
@@ -109,7 +110,7 @@ export default function MatchDetail() {
           </div>
           <div className={styles.team}>
             <div className={styles.logoLg}>
-               {match.awayLogo && <img src={match.awayLogo} alt={match.awayTeam} className={styles.logoImg} />}
+              {(() => { const url = match.awayLogo || getTeamLogoUrl(match.awayTeam); return url ? <img src={url.endsWith('/1') ? url : url + '/1'} alt={match.awayTeam} className={styles.logoImg} /> : null; })()}
             </div>
             <h2>{match.awayTeam}</h2>
           </div>
