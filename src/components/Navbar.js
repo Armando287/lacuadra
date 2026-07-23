@@ -60,6 +60,18 @@ export default function Navbar() {
             Reglas
           </Link>
           
+          <form className={styles.searchForm} onSubmit={(e) => {
+            e.preventDefault();
+            const q = e.target.search.value;
+            if (q) window.location.href = `/search?q=${encodeURIComponent(q)}`;
+          }}>
+            <input 
+              type="text" 
+              name="search" 
+              placeholder="🔍 Buscar amigos..." 
+              className={styles.searchInput}
+            />
+          </form>
           {username ? (
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <Link href={`/profile/${userId}`} style={{ color: '#fff', fontWeight: 'bold', textDecoration: 'none' }} className={styles.profileLink}>
