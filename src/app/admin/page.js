@@ -12,6 +12,7 @@ export default function AdminPage() {
   // States for Matches Fetcher
   const [liga, setLiga] = useState('Primera División de Paraguay');
   const [fase, setFase] = useState('Clausura');
+  const [ano, setAno] = useState(new Date().getFullYear().toString());
   const [jornada, setJornada] = useState('Fecha 1');
   const [isFetchingMatches, setIsFetchingMatches] = useState(false);
   const [matchMessage, setMatchMessage] = useState('');
@@ -22,7 +23,7 @@ export default function AdminPage() {
   const [manualMatch, setManualMatch] = useState({
     home_team: '', away_team: '', score_home: '', score_away: '', 
     match_date: new Date().toISOString().slice(0, 16), 
-    tournament: 'Primera División de Paraguay', round: 'Fecha 1', status: 'upcoming'
+    tournament: `Primera División de Paraguay Clausura ${new Date().getFullYear()}`, round: 'Fecha 1', status: 'upcoming'
   });
 
   useEffect(() => {
@@ -85,7 +86,9 @@ export default function AdminPage() {
     setIsFetchingMatches(true);
     setMatchMessage('');
     try {
-      const fullTournament = fase ? `${liga} ${fase}` : liga;
+      let fullTournament = fase ? `${liga} ${fase}` : liga;
+      if (ano) fullTournament = `${fullTournament} ${ano}`;
+
       const res = await fetch('/api/admin/matches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -172,7 +175,7 @@ export default function AdminPage() {
     setManualMatch({
       home_team: '', away_team: '', score_home: '', score_away: '', 
       match_date: new Date().toISOString().slice(0, 16), 
-      tournament: 'Primera División de Paraguay', round: 'Fecha 1', status: 'upcoming'
+      tournament: `Primera División de Paraguay Clausura ${new Date().getFullYear()}`, round: 'Fecha 1', status: 'upcoming'
     });
   };
 
@@ -201,15 +204,27 @@ export default function AdminPage() {
                 className={styles.input}
               />
             </div>
-            <div className={styles.inputGroup}>
-              <label>Fase (Apertura / Clausura)</label>
-              <input 
-                type="text" 
-                value={fase} 
-                onChange={(e) => setFase(e.target.value)} 
-                placeholder="Ej. Clausura"
-                className={styles.input}
-              />
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <div className={styles.inputGroup} style={{ flex: 2 }}>
+                <label>Fase (Apertura / Clausura)</label>
+                <input 
+                  type="text" 
+                  value={fase} 
+                  onChange={(e) => setFase(e.target.value)} 
+                  placeholder="Ej. Clausura"
+                  className={styles.input}
+                />
+              </div>
+              <div className={styles.inputGroup} style={{ flex: 1 }}>
+                <label>Año</label>
+                <input 
+                  type="number" 
+                  value={ano} 
+                  onChange={(e) => setAno(e.target.value)} 
+                  required
+                  className={styles.input}
+                />
+              </div>
             </div>
             <div className={styles.inputGroup}>
               <label>Jornada (Ej: Fecha 2)</label>
