@@ -59,3 +59,38 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
+
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    let fileUrl = searchParams.get('url');
+
+    if (!fileUrl) {
+      return NextResponse.json({ success: false, error: 'No url provided' }, { status: 400 });
+    }
+
+    // Extract filename from the proxy URL format: /api/proxy/image?file=FILENAME
+    let filename = fileUrl;
+    if (fileUrl.includes('?file=')) {
+      filename = fileUrl.split('?file=')[1];
+    }
+
+    if (!filename) {
+      return NextResponse.json({ success: false, error: 'Invalid file format' }, { status: 400 });
+    }
+
+    const command = new DeleteObjectCommand({
+      Bucket: 'lacuadra_uploads',
+      Key: filename,
+    });
+
+    await s3.send(command);
+
+    return NextResponse.json({ success: true, message: 'File deleted from S3' });
+  } catch (error) {
+    console.error("Delete error:", error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}

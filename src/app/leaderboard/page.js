@@ -21,27 +21,37 @@ export default function Leaderboard() {
 
   const renderGeneral = () => (
     <div className={styles.list}>
+      <div className={styles.headerRow}>
+        <div className={styles.colPos}>#</div>
+        <div className={styles.colUser}>Usuario</div>
+        <div className={styles.colClub}>Club</div>
+        <div className={styles.colStat}>Pleno</div>
+        <div className={styles.colStat}>Fechas</div>
+        <div className={styles.colPts}>Pts</div>
+      </div>
       {data.general.map((user, index) => {
-        let positionClass = '';
-        let badgeClass = '';
-        let badgeText = '';
-
-        if (index === 0) { positionClass = styles.gold; badgeClass = styles.goldBadge; badgeText = '1º'; }
-        else if (index === 1) { positionClass = styles.silver; badgeClass = styles.silverBadge; badgeText = '2º'; }
-        else if (index === 2) { positionClass = styles.bronze; badgeClass = styles.bronzeBadge; badgeText = '3º'; }
-
         return (
           <div key={user.id} className={styles.row}>
-            <div className={styles.userCell}>
+            <div className={styles.colPos}>{index + 1}</div>
+            
+            <div className={styles.colUser}>
               <img src={user.avatarUrl} alt={user.username} className={styles.avatar} />
               <span className={styles.username}>{user.username}</span>
             </div>
             
-            <div className={styles.clubCell}>
+            <div className={styles.colClub}>
               {user.club ? user.club : '-'}
             </div>
 
-            <div className={styles.pointsCell}>
+            <div className={styles.colStat}>
+              {user.exactHits || 0}
+            </div>
+
+            <div className={styles.colStat}>
+              {user.roundWins || 0}
+            </div>
+
+            <div className={styles.colPts}>
               {user.points}
             </div>
           </div>

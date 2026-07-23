@@ -25,6 +25,32 @@ export async function GET(request) {
   }
 }
 
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
+
+const s3 = new S3Client({
+  region: 'us-east-1',
+  endpoint: 'https://s3.hf.co/infovips',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'HFAKRJvAzDiCp28xL4aeGd4nuC4SxP5',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '6005347d7394e0e7fb4733e647df15297003969f92868c6e79ffa5dcae46d905',
+  },
+  forcePathStyle: true
+});
+
+async function deleteFromS3(fileUrl) {
+  if (!fileUrl || !fileUrl.includes('?file=')) return;
+  try {
+    const filename = fileUrl.split('?file=')[1];
+    await s3.send(new DeleteObjectCommand({
+      Bucket: 'lacuadra_uploads',
+      Key: filename,
+    }));
+    console.log("Deleted old file:", filename);
+  } catch (e) {
+    console.error("Failed to delete old file:", e);
+  }
+}
+
 // Update a user's profile
 export async function PATCH(request) {
   try {
@@ -33,11 +59,34 @@ export async function PATCH(request) {
 
     if (!id) return NextResponse.json({ success: false, error: 'User ID required' }, { status: 400 });
 
+    // 1. Fetch current user to get old URLs
+    const { data: currentUser, error: fetchErr } = await supabase
+      .from('users')
+      .select('avatar_url, cover_url')
+      .eq('id', id)
+      .single();
+
+    if (fetchErr) throw fetchErr;
+
     const updates = {};
     if (phone !== undefined) updates.phone = phone;
     if (bio !== undefined) updates.bio = bio;
-    if (avatar_url !== undefined) updates.avatar_url = avatar_url;
-    if (cover_url !== undefined) updates.cover_url = cover_url;
+    
+    // Check if avatar is being replaced
+    if (avatar_url !== undefined) {
+      if (currentUser.avatar_url && currentUser.avatar_url !== avatar_url) {
+        await deleteFromS3(currentUser.avatar_url);
+      }
+      updates.avatar_url = avatar_url;
+    }
+    
+    // Check if cover is being replaced
+    if (cover_url !== undefined) {
+      if (currentUser.cover_url && currentUser.cover_url !== cover_url) {
+        await deleteFromS3(currentUser.cover_url);
+      }
+      updates.cover_url = cover_url;
+    }
 
     const { data, error } = await supabase
       .from('users')

@@ -24,29 +24,45 @@
 .tableContainer {
   padding: 0;
   width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .list {
   display: flex;
   flex-direction: column;
+  min-width: 600px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 .row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1rem 0;
+  padding: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   background: transparent;
-  border-radius: 0;
+  transition: background 0.2s;
 }
 
-.userCell {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex: 2;
+.row:hover {
+  background: rgba(255, 255, 255, 0.02);
 }
+
+.colPos { width: 40px; font-weight: 800; font-size: 1.2rem; color: var(--text-muted); }
+.colUser { flex: 2; display: flex; align-items: center; gap: 1rem; min-width: 200px; }
+.colClub { flex: 1; min-width: 120px; font-size: 0.9rem; color: var(--text-light); }
+.colStat { width: 80px; text-align: center; font-weight: 600; color: var(--text-main); }
+.colPts { width: 80px; text-align: center; font-weight: 900; font-size: 1.2rem; color: var(--primary-color); }
 
 .avatar {
   width: 40px;
@@ -57,22 +73,7 @@
 
 .username {
   font-size: 1rem;
-  font-weight: 500;
-  color: var(--text-light);
-}
-
-.clubCell {
-  flex: 1;
-  text-align: left;
-  font-size: 0.9rem;
-  color: var(--text-light);
-}
-
-.pointsCell {
-  flex: 1;
-  text-align: right;
-  font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-light);
 }
 
@@ -187,7 +188,7 @@
     padding-bottom: 10px;
     -webkit-overflow-scrolling: touch;
     gap: 0.5rem;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
   }
   
   .tabsContainer::-webkit-scrollbar {
@@ -202,25 +203,6 @@
   }
   
   .tableContainer {
-    padding: 1rem;
-    border-radius: 16px;
-  }
-
-  .row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
-    padding: 1.2rem;
-  }
-  .rightCol {
-    width: 100%;
-    justify-content: space-between;
-  }
-  .statsCol {
-    width: 100%;
-    justify-content: space-around;
     padding: 1rem 0;
-    border-top: 1px dashed rgba(255,255,255,0.1);
-    border-bottom: 1px dashed rgba(255,255,255,0.1);
   }
 }

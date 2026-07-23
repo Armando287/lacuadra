@@ -22,6 +22,9 @@ export default function PublicProfile() {
   const [newPostContent, setNewPostContent] = useState('');
   const [mediaFile, setMediaFile] = useState(null);
   const [posting, setPosting] = useState(false);
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editContent, setEditContent] = useState('');
+  const [menuOpenId, setMenuOpenId] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -178,6 +181,46 @@ export default function PublicProfile() {
     }
   };
 
+  const handleDeletePost = async (postId) => {
+    if (!confirm('¿Seguro que quieres eliminar esta publicación? Esto también borrará la imagen/video.')) return;
+    const toastId = toast.loading('Eliminando...');
+    try {
+      const res = await fetch(`/api/posts/${postId}?user_id=${currentUserId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setPosts(posts.filter(p => p.id !== postId));
+        toast.success('Publicación eliminada', { id: toastId });
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (err) {
+      toast.error(err.message, { id: toastId });
+    }
+    setMenuOpenId(null);
+  };
+
+  const handleEditPost = async (postId) => {
+    if (!editContent.trim()) return;
+    const toastId = toast.loading('Guardando cambios...');
+    try {
+      const res = await fetch(`/api/posts/${postId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: currentUserId, content: editContent })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPosts(posts.map(p => p.id === postId ? { ...p, content: editContent } : p));
+        toast.success('Publicación actualizada', { id: toastId });
+        setEditingPostId(null);
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (err) {
+      toast.error(err.message, { id: toastId });
+    }
+  };
+
   if (loading) return <div style={{ color: 'white', textAlign: 'center', marginTop: '5rem' }}>Cargando Perfil...</div>;
   if (!profile) return (
     <div style={{ color: 'white', textAlign: 'center', marginTop: '5rem' }}>
@@ -319,12 +362,58 @@ export default function PublicProfile() {
                         <span className={styles.postAuthor}>{post.user?.username || 'Usuario'}</span>
                         <span className={styles.postDate}>{new Date(post.created_at).toLocaleString()}</span>
                       </div>
+                      
+                      {post.user_id == currentUserId && (
+                        <div style={{ marginLeft: 'auto', position: 'relative' }}>
+                          <button 
+                            style={{ background: 'transparent', border: 'none', color: '#ccc', cursor: 'pointer', fontSize: '1.2rem' }}
+                            onClick={() => setMenuOpenId(menuOpenId === post.id ? null : post.id)}
+                          >
+                            ⋮
+                          </button>
+                          {menuOpenId === post.id && (
+                            <div style={{ position: 'absolute', right: 0, top: '100%', background: '#1a1a24', border: '1px solid #333', borderRadius: '8px', zIndex: 10, minWidth: '120px', overflow: 'hidden' }}>
+                              <button 
+                                style={{ width: '100%', padding: '10px', background: 'transparent', border: 'none', color: 'white', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #333' }}
+                                onClick={() => {
+                                  setEditingPostId(post.id);
+                                  setEditContent(post.content || '');
+                                  setMenuOpenId(null);
+                                }}
+                              >
+                                Editar
+                              </button>
+                              <button 
+                                style={{ width: '100%', padding: '10px', background: 'transparent', border: 'none', color: '#ff4444', textAlign: 'left', cursor: 'pointer' }}
+                                onClick={() => handleDeletePost(post.id)}
+                              >
+                                Eliminar
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                     
-                    {post.content && (
+                    {editingPostId === post.id ? (
                       <div className={styles.postContent} style={{ marginBottom: post.media_url ? '1rem' : '0' }}>
-                        {post.content}
+                        <textarea 
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          className={styles.postInput}
+                          style={{ minHeight: '80px', marginBottom: '10px' }}
+                        />
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                          <button className="btn-secondary" onClick={() => setEditingPostId(null)}>Cancelar</button>
+                          <button className="btn-primary" onClick={() => handleEditPost(post.id)}>Guardar</button>
+                        </div>
                       </div>
+                    ) : (
+                      post.content && (
+                        <div className={styles.postContent} style={{ marginBottom: post.media_url ? '1rem' : '0' }}>
+                          {post.content}
+                        </div>
+                      )
                     )}
 
                     {post.media_url && (
