@@ -3,21 +3,30 @@
 const TEAM_LOGOS = {
   '2 de Mayo':            'begec',
   'Rubio Ñú':             'ihhe',
+  'Rubio Ñu':             'ihhe',
+  'Rubio Nu':             'ihhe',
   'Cerro Porteño':        'bcje',
   'Cerro':                'bcje',
   'Sportivo Trinidense':  'begea',
+  'Trinidense':           'begea',
   'Recoleta FC':          'fdcaj',
+  'Deportivo Recoleta':   'fdcaj',
   'Recoleta':             'fdcaj',
   'CS San Lorenzo':       'begde',
+  'Sportivo San Lorenzo': 'begde',
   'San Lorenzo':          'begde',
   'Sportivo Ameliano':    'fgfii',
+  'Ameliano':             'fgfii',
   'Club Nacional':        'bcia',
   'Nacional':             'bcia',
   'Olimpia':              'ifei',
   'Libertad':             'bcig',
   'Club Guaraní':         'hhdj',
   'Guaraní':              'hhdj',
+  'Guarani':              'hhdj',
   'Sportivo Luqueño':     'ihhi',
+  'Luqueño':              'ihhi',
+  'Luqueno':              'ihhi',
 };
 
 /**
@@ -27,19 +36,26 @@ const TEAM_LOGOS = {
 export function getTeamLogoUrl(teamName) {
   if (!teamName) return '';
 
+  const cleanName = teamName.trim();
+
   // Direct match
-  const id = TEAM_LOGOS[teamName];
+  const id = TEAM_LOGOS[cleanName];
   if (id) return `/logos/${id}.png`;
 
-  // Case-insensitive match
-  const lowerName = teamName.toLowerCase();
+  // Normalize string (remove accents/diacritics)
+  const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  const lowerName = normalize(cleanName);
+  
+  // Case-insensitive & accent-insensitive match
   for (const [name, teamId] of Object.entries(TEAM_LOGOS)) {
-    if (name.toLowerCase() === lowerName) return `/logos/${teamId}.png`;
+    if (normalize(name) === lowerName) return `/logos/${teamId}.png`;
   }
 
   // Partial match
   for (const [name, teamId] of Object.entries(TEAM_LOGOS)) {
-    if (lowerName.includes(name.toLowerCase()) || name.toLowerCase().includes(lowerName)) {
+    const normName = normalize(name);
+    if (lowerName.includes(normName) || normName.includes(lowerName)) {
       return `/logos/${teamId}.png`;
     }
   }
