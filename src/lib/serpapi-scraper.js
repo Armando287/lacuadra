@@ -20,15 +20,15 @@ function parseGoogleDate(dateStr, timeStr) {
   try {
     if (!dateStr) return new Date().toISOString();
     
-    // Paraguay time for 'today'
+    // Paraguay time for 'today' (using UTC-3 offset matching the user's local timezone)
     let d = new Date();
-    d = new Date(d.getTime() - (4 * 60 * 60 * 1000));
+    d = new Date(d.getTime() - (3 * 60 * 60 * 1000));
     
     let year = d.getUTCFullYear();
     let month = d.getUTCMonth() + 1;
     let day = d.getUTCDate();
     
-    const strLower = dateStr.toLowerCase();
+    const strLower = dateStr.toLowerCase().trim();
     
     if (strLower.includes("hoy") || strLower.includes("today")) {
       // keep today
@@ -38,12 +38,40 @@ function parseGoogleDate(dateStr, timeStr) {
       month = d.getUTCMonth() + 1;
       day = d.getUTCDate();
     } else {
-      const parts = dateStr.split(' ');
-      const dayMonth = parts[parts.length - 1]; // "25/7"
-      const dmParts = dayMonth.split('/');
-      if (dmParts.length >= 2) {
-        day = parseInt(dmParts[0]);
-        month = parseInt(dmParts[1]);
+      if (strLower.includes('/')) {
+        const parts = strLower.split(' ');
+        const dayMonth = parts[parts.length - 1]; // "25/7"
+        const dmParts = dayMonth.split('/');
+        if (dmParts.length >= 2) {
+          day = parseInt(dmParts[0]);
+          month = parseInt(dmParts[1]);
+        }
+      } else {
+        // Parse "Sat, Jul 25" or "Sáb, 25 jul"
+        const months = {
+          'jan': 1, 'ene': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'abr': 4,
+          'may': 5, 'jun': 6, 'jul': 7, 'aug': 8, 'ago': 8, 'sep': 9,
+          'oct': 10, 'nov': 11, 'dec': 12, 'dic': 12
+        };
+        const parts = strLower.replace(/,/g, '').split(' ');
+        let foundMonth = null;
+        let foundDay = null;
+        for (let p of parts) {
+          if (!isNaN(parseInt(p))) {
+            foundDay = parseInt(p);
+          } else {
+            for (const [mName, mNum] of Object.entries(months)) {
+              if (p.includes(mName)) {
+                foundMonth = mNum;
+                break;
+              }
+            }
+          }
+        }
+        if (foundMonth !== null && foundDay !== null) {
+          month = foundMonth;
+          day = foundDay;
+        }
       }
     }
     
@@ -65,8 +93,8 @@ function parseGoogleDate(dateStr, timeStr) {
     }
     
     const pad = (n) => n.toString().padStart(2, '0');
-    // Offset de Paraguay es -04:00
-    const isoString = `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(min)}:00-04:00`;
+    // Offset -03:00 para coincidir con la hora local (Paraguay/Verano o GMT-3)
+    const isoString = `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(min)}:00-03:00`;
     return new Date(isoString).toISOString();
   } catch (e) {
     console.error("Error parsing date:", e);
