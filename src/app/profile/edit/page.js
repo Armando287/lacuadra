@@ -71,14 +71,77 @@ export default function EditProfile() {
     }
   };
 
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      // Solo comprimimos imágenes
+      if (!file.type.startsWith('image/')) {
+        resolve(file);
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Reducir tamaño si es más grande de 1200px de ancho o alto
+          const MAX_SIZE = 1200;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob((blob) => {
+            const newFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(newFile);
+          }, 'image/jpeg', 0.8); // 80% calidad
+        };
+        img.onerror = (error) => reject(error);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const uploadFile = async (file) => {
+    let compressedFile = file;
+    try {
+      compressedFile = await compressImage(file);
+    } catch (e) {
+      console.warn("No se pudo comprimir la imagen", e);
+    }
+    
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', compressedFile);
     
     const res = await fetch('/api/upload', {
       method: 'POST',
       body: formData
     });
+    
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Upload failed (${res.status}): ${text.substring(0, 50)}...`);
+    }
     
     const data = await res.json();
     if (data.success) {

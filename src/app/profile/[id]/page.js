@@ -131,16 +131,57 @@ export default function PublicProfile() {
       let media_url = null;
       let media_type = null;
 
+      // Compresión de imagen cliente
+      const compressImage = (file) => {
+        return new Promise((resolve, reject) => {
+          if (!file.type.startsWith('image/')) return resolve(file);
+          
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+              const MAX_SIZE = 1200;
+              if (width > height) {
+                if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+              } else {
+                if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              canvas.toBlob((blob) => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg', 0.8);
+            };
+            img.onerror = (e) => reject(e);
+          };
+          reader.onerror = (e) => reject(e);
+        });
+      };
+
       // 1. Upload media if exists
       if (mediaFile) {
         toast.loading('Subiendo archivo...', { id: toastId });
+        
+        let fileToUpload = mediaFile;
+        try { fileToUpload = await compressImage(mediaFile); } catch (e) { console.warn("Compression failed", e); }
+        
         const formData = new FormData();
-        formData.append('file', mediaFile);
+        formData.append('file', fileToUpload);
         
         const uploadRes = await fetch('/api/upload', {
           method: 'POST',
           body: formData
         });
+        
+        if (!uploadRes.ok) {
+          const text = await uploadRes.text();
+          throw new Error(`Upload failed: ${text.substring(0, 40)}`);
+        }
         const uploadData = await uploadRes.json();
         
         if (!uploadData.success) {

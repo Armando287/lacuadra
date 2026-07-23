@@ -62,7 +62,7 @@ export async function PATCH(request) {
     // 1. Fetch current user to get old URLs, cooldown, and password
     const { data: currentUser, error: fetchErr } = await supabase
       .from('users')
-      .select('avatar_url, cover_url, last_profile_edit, password')
+      .select('username, favorite_club, avatar_url, cover_url, last_profile_edit, password')
       .eq('id', id)
       .single();
 
@@ -83,7 +83,10 @@ export async function PATCH(request) {
     
     // Check Cooldown for username and club
     const { username, favorite_club } = body;
-    if (username !== undefined || favorite_club !== undefined) {
+    const isUsernameChanged = username !== undefined && username !== currentUser.username;
+    const isClubChanged = favorite_club !== undefined && favorite_club !== currentUser.favorite_club;
+
+    if (isUsernameChanged || isClubChanged) {
       if (currentUser.last_profile_edit) {
         const lastEdit = new Date(currentUser.last_profile_edit);
         const fiveMonthsAgo = new Date();
@@ -99,8 +102,8 @@ export async function PATCH(request) {
         }
       }
       
-      if (username !== undefined) updates.username = username;
-      if (favorite_club !== undefined) updates.favorite_club = favorite_club;
+      if (isUsernameChanged) updates.username = username;
+      if (isClubChanged) updates.favorite_club = favorite_club;
       updates.last_profile_edit = new Date().toISOString();
     }
 
