@@ -35,7 +35,7 @@ export default function Navbar() {
       <nav className={styles.navbar}>
         <div className={styles.logo}>
           <Link href="/">
-            <span className={styles.logoText}>La Cuadra</span>
+            <img src="/logo.png" alt="La Cuadra" style={{ height: '40px', width: 'auto' }} />
           </Link>
         </div>
         <div className={styles.links}>
