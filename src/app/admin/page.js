@@ -179,226 +179,261 @@ export default function AdminPage() {
     });
   };
 
+  const [activeTab, setActiveTab] = useState('sync');
+
   if (loading) return <div style={{ color: 'white', textAlign: 'center', marginTop: '5rem' }}>Cargando Panel Admin...</div>;
 
   return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>Panel de Administración</h1>
+    <main className={styles.layout}>
+      
+      {/* SIDEBAR NAVIGATION */}
+      <aside className={styles.sidebar}>
+        <h2 className={styles.sidebarTitle}>Admin <span>Panel</span></h2>
+        
+        <button 
+          className={`${styles.tabBtn} ${activeTab === 'sync' ? styles.tabBtnActive : ''}`}
+          onClick={() => setActiveTab('sync')}
+        >
+          🔄 Sincronizar API
+        </button>
+        
+        <button 
+          className={`${styles.tabBtn} ${activeTab === 'manual' ? styles.tabBtnActive : ''}`}
+          onClick={() => setActiveTab('manual')}
+        >
+          ✏️ Gestión Manual
+        </button>
+        
+        <button 
+          className={`${styles.tabBtn} ${activeTab === 'users' ? styles.tabBtnActive : ''}`}
+          onClick={() => setActiveTab('users')}
+        >
+          👥 Usuarios
+        </button>
+      </aside>
 
-      <div className={styles.grid}>
-        {/* MATCHES MANAGER */}
-        <section className={`glass-panel ${styles.panel}`}>
-          <h2>Sincronizar Partidos</h2>
-          <p style={{ marginBottom: '1rem', color: '#ccc' }}>
-            Usa esta herramienta para buscar los partidos de esta semana en Google y guardarlos.
-            Llena los campos abajo para forzar la etiqueta de la fecha.
-          </p>
-          <form onSubmit={handleFetchMatches} className={styles.form}>
-            <div className={styles.inputGroup}>
-              <label>Liga / País</label>
-              <input 
-                type="text" 
-                value={liga} 
-                onChange={(e) => setLiga(e.target.value)} 
-                required 
-                className={styles.input}
-              />
-            </div>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <div className={styles.inputGroup} style={{ flex: 2 }}>
-                <label>Fase (Apertura / Clausura)</label>
+      {/* MAIN CONTENT AREA */}
+      <div className={styles.content}>
+        
+        {/* TAB 1: MATCHES SYNC */}
+        {activeTab === 'sync' && (
+          <section className={styles.panel}>
+            <h2>Sincronizar Partidos</h2>
+            <p style={{ marginBottom: '1.5rem', color: '#ccc', lineHeight: '1.6' }}>
+              Usa esta herramienta para buscar los partidos de esta semana en Google y guardarlos.
+              Llena los campos abajo para forzar la etiqueta de la fecha.
+            </p>
+            <form onSubmit={handleFetchMatches} className={styles.form}>
+              <div className={styles.inputGroup}>
+                <label>Liga / País</label>
                 <input 
                   type="text" 
-                  value={fase} 
-                  onChange={(e) => setFase(e.target.value)} 
-                  placeholder="Ej. Clausura"
+                  value={liga} 
+                  onChange={(e) => setLiga(e.target.value)} 
+                  required 
                   className={styles.input}
                 />
               </div>
-              <div className={styles.inputGroup} style={{ flex: 1 }}>
-                <label>Año</label>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className={styles.inputGroup} style={{ flex: 2 }}>
+                  <label>Fase (Apertura / Clausura)</label>
+                  <input 
+                    type="text" 
+                    value={fase} 
+                    onChange={(e) => setFase(e.target.value)} 
+                    placeholder="Ej. Clausura"
+                    className={styles.input}
+                  />
+                </div>
+                <div className={styles.inputGroup} style={{ flex: 1 }}>
+                  <label>Año</label>
+                  <input 
+                    type="number" 
+                    value={ano} 
+                    onChange={(e) => setAno(e.target.value)} 
+                    required
+                    className={styles.input}
+                  />
+                </div>
+              </div>
+              <div className={styles.inputGroup}>
+                <label>Jornada (Ej: Fecha 2)</label>
                 <input 
-                  type="number" 
-                  value={ano} 
-                  onChange={(e) => setAno(e.target.value)} 
+                  type="text" 
+                  value={jornada} 
+                  onChange={(e) => setJornada(e.target.value)} 
+                  placeholder="Ej. Fecha 2"
                   required
                   className={styles.input}
                 />
               </div>
-            </div>
-            <div className={styles.inputGroup}>
-              <label>Jornada (Ej: Fecha 2)</label>
-              <input 
-                type="text" 
-                value={jornada} 
-                onChange={(e) => setJornada(e.target.value)} 
-                placeholder="Ej. Fecha 2"
-                required
-                className={styles.input}
-              />
-            </div>
-            <button type="submit" className="btn-primary" disabled={isFetchingMatches}>
-              {isFetchingMatches ? 'Buscando y Sincronizando...' : 'Extraer de Google y Guardar'}
-            </button>
-          </form>
-          {matchMessage && (
-            <div className={styles.messageBlock}>
-              {matchMessage}
-            </div>
-          )}
-        </section>
+              <button type="submit" className="btn-primary" disabled={isFetchingMatches} style={{ marginTop: '1rem', padding: '1rem' }}>
+                {isFetchingMatches ? 'Buscando y Sincronizando...' : 'Extraer de Google y Guardar'}
+              </button>
+            </form>
+            {matchMessage && (
+              <div className={styles.messageBlock}>
+                {matchMessage}
+              </div>
+            )}
+          </section>
+        )}
 
-        {/* USERS MANAGER */}
-        <section className={`glass-panel ${styles.panel}`}>
-          <h2>Gestión de Usuarios</h2>
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Usuario</th>
-                  <th>Club</th>
-                  <th>Puntos</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map(u => (
-                  <tr key={u.id}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <img src={u.avatar_url} alt="avatar" width="30" height="30" style={{ borderRadius: '50%' }} />
-                        {u.username} {u.is_admin && '👑'}
-                      </div>
-                    </td>
-                    <td>{u.favorite_club || '-'}</td>
-                    <td>{u.points}</td>
-                    <td>
-                      <span className={u.is_banned ? styles.badgeDanger : styles.badgeSuccess}>
-                        {u.is_banned ? 'Baneado' : 'Activo'}
-                      </span>
-                    </td>
-                    <td>
-                      <div className={styles.actions}>
-                        <button 
-                          onClick={() => toggleBan(u.id, u.is_banned)}
-                          className={u.is_banned ? styles.btnSuccess : styles.btnWarning}
-                          disabled={u.is_admin}
-                        >
-                          {u.is_banned ? 'Desbanear' : 'Banear'}
-                        </button>
-                        <button 
-                          onClick={() => deleteUser(u.id)}
-                          className={styles.btnDanger}
-                          disabled={u.is_admin}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {users.length === 0 && (
-                  <tr>
-                    <td colSpan="5" style={{ textAlign: 'center' }}>No hay usuarios.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* MANUAL MATCHES MANAGER */}
-        <section className={`glass-panel ${styles.panel}`} style={{ gridColumn: '1 / -1' }}>
-          <h2>Gestor Manual de Partidos</h2>
-          <div className={styles.grid}>
-            <div>
-              <h3>Agregar / Editar Partido</h3>
-              <form onSubmit={handleManualMatchSubmit} className={styles.form}>
-                <div className={styles.inputGroup}>
-                  <label>Equipo Local</label>
-                  <input type="text" className={styles.input} value={manualMatch.home_team} onChange={e => setManualMatch({...manualMatch, home_team: e.target.value})} required />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>Equipo Visitante</label>
-                  <input type="text" className={styles.input} value={manualMatch.away_team} onChange={e => setManualMatch({...manualMatch, away_team: e.target.value})} required />
-                </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <div className={styles.inputGroup} style={{ flex: 1 }}>
-                    <label>Goles Local</label>
-                    <input type="number" className={styles.input} value={manualMatch.score_home} onChange={e => setManualMatch({...manualMatch, score_home: e.target.value})} />
+        {/* TAB 2: MANUAL MATCHES */}
+        {activeTab === 'manual' && (
+          <section className={styles.panel}>
+            <h2>Gestor Manual de Partidos</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              <div>
+                <h3 style={{ marginBottom: '1rem', color: '#ccc' }}>Agregar / Editar Partido</h3>
+                <form onSubmit={handleManualMatchSubmit} className={styles.form}>
+                  <div className={styles.inputGroup}>
+                    <label>Equipo Local</label>
+                    <input type="text" className={styles.input} value={manualMatch.home_team} onChange={e => setManualMatch({...manualMatch, home_team: e.target.value})} required />
                   </div>
-                  <div className={styles.inputGroup} style={{ flex: 1 }}>
-                    <label>Goles Visitante</label>
-                    <input type="number" className={styles.input} value={manualMatch.score_away} onChange={e => setManualMatch({...manualMatch, score_away: e.target.value})} />
+                  <div className={styles.inputGroup}>
+                    <label>Equipo Visitante</label>
+                    <input type="text" className={styles.input} value={manualMatch.away_team} onChange={e => setManualMatch({...manualMatch, away_team: e.target.value})} required />
                   </div>
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>Fecha y Hora</label>
-                  <input type="datetime-local" className={styles.input} value={manualMatch.match_date} onChange={e => setManualMatch({...manualMatch, match_date: e.target.value})} required />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>Torneo</label>
-                  <input type="text" className={styles.input} value={manualMatch.tournament} onChange={e => setManualMatch({...manualMatch, tournament: e.target.value})} required />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>Jornada / Fecha</label>
-                  <input type="text" className={styles.input} value={manualMatch.round} onChange={e => setManualMatch({...manualMatch, round: e.target.value})} />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>Estado</label>
-                  <select className={styles.input} value={manualMatch.status} onChange={e => setManualMatch({...manualMatch, status: e.target.value})}>
-                    <option value="upcoming">Próximo</option>
-                    <option value="live">En Vivo</option>
-                    <option value="finished">Finalizado</option>
-                  </select>
-                </div>
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <button type="submit" className="btn-primary" style={{ flex: 1 }}>{editingMatchId ? 'Actualizar Partido' : 'Crear Partido'}</button>
-                  {editingMatchId && (
-                    <button type="button" className={styles.btnWarning} onClick={resetManualMatch} style={{ flex: 1 }}>Cancelar</button>
-                  )}
-                </div>
-              </form>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <div className={styles.inputGroup} style={{ flex: 1 }}>
+                      <label>Goles Local</label>
+                      <input type="number" className={styles.input} value={manualMatch.score_home} onChange={e => setManualMatch({...manualMatch, score_home: e.target.value})} />
+                    </div>
+                    <div className={styles.inputGroup} style={{ flex: 1 }}>
+                      <label>Goles Visitante</label>
+                      <input type="number" className={styles.input} value={manualMatch.score_away} onChange={e => setManualMatch({...manualMatch, score_away: e.target.value})} />
+                    </div>
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Fecha y Hora</label>
+                    <input type="datetime-local" className={styles.input} value={manualMatch.match_date} onChange={e => setManualMatch({...manualMatch, match_date: e.target.value})} required />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Torneo (Completo)</label>
+                    <input type="text" className={styles.input} value={manualMatch.tournament} onChange={e => setManualMatch({...manualMatch, tournament: e.target.value})} required />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Jornada / Fecha</label>
+                    <input type="text" className={styles.input} value={manualMatch.round} onChange={e => setManualMatch({...manualMatch, round: e.target.value})} />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Estado</label>
+                    <select className={styles.input} value={manualMatch.status} onChange={e => setManualMatch({...manualMatch, status: e.target.value})}>
+                      <option value="upcoming">Próximo</option>
+                      <option value="live">En Vivo</option>
+                      <option value="finished">Finalizado</option>
+                    </select>
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                    <button type="submit" className="btn-primary" style={{ flex: 1 }}>{editingMatchId ? 'Actualizar Partido' : 'Crear Partido'}</button>
+                    {editingMatchId && (
+                      <button type="button" className={styles.btnWarning} onClick={resetManualMatch} style={{ flex: 1 }}>Cancelar</button>
+                    )}
+                  </div>
+                </form>
+              </div>
+              
+              <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Partido</th>
+                      <th>Estado</th>
+                      <th>Torneo</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dbMatches.map(m => (
+                      <tr key={m.id}>
+                        <td>{new Date(m.match_date).toLocaleString()}</td>
+                        <td>
+                          <strong>{m.home_team} {m.score_home !== null ? m.score_home : '-'}</strong> vs <strong>{m.score_away !== null ? m.score_away : '-'} {m.away_team}</strong>
+                        </td>
+                        <td>{m.status}</td>
+                        <td>{m.tournament} {m.round}</td>
+                        <td>
+                          <div className={styles.actions}>
+                            <button className={styles.btnWarning} onClick={() => editMatch(m)}>Editar</button>
+                            <button className={styles.btnDanger} onClick={() => deleteMatch(m.id)}>Eliminar</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {dbMatches.length === 0 && (
+                      <tr><td colSpan="5" style={{ textAlign: 'center' }}>No hay partidos en la base de datos.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-            
+          </section>
+        )}
+
+        {/* TAB 3: USERS MANAGER */}
+        {activeTab === 'users' && (
+          <section className={styles.panel}>
+            <h2>Gestión de Usuarios</h2>
             <div className={styles.tableContainer}>
-              <h3>Partidos Guardados</h3>
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Fecha</th>
-                    <th>Partido</th>
+                    <th>Usuario</th>
+                    <th>Club</th>
+                    <th>Puntos</th>
                     <th>Estado</th>
-                    <th>Torneo</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {dbMatches.map(m => (
-                    <tr key={m.id}>
-                      <td>{new Date(m.match_date).toLocaleString()}</td>
+                  {users.map(u => (
+                    <tr key={u.id}>
                       <td>
-                        <strong>{m.home_team} {m.score_home !== null ? m.score_home : '-'}</strong> vs <strong>{m.score_away !== null ? m.score_away : '-'} {m.away_team}</strong>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <img src={u.avatar_url} alt="avatar" width="30" height="30" style={{ borderRadius: '50%' }} />
+                          {u.username} {u.is_admin && '👑'}
+                        </div>
                       </td>
-                      <td>{m.status}</td>
-                      <td>{m.tournament} {m.round}</td>
+                      <td>{u.favorite_club || '-'}</td>
+                      <td>{u.points}</td>
+                      <td>
+                        <span className={u.is_banned ? styles.badgeDanger : styles.badgeSuccess}>
+                          {u.is_banned ? 'Baneado' : 'Activo'}
+                        </span>
+                      </td>
                       <td>
                         <div className={styles.actions}>
-                          <button className={styles.btnWarning} onClick={() => editMatch(m)}>Editar</button>
-                          <button className={styles.btnDanger} onClick={() => deleteMatch(m.id)}>Eliminar</button>
+                          <button 
+                            onClick={() => toggleBan(u.id, u.is_banned)}
+                            className={u.is_banned ? styles.btnSuccess : styles.btnWarning}
+                            disabled={u.is_admin}
+                          >
+                            {u.is_banned ? 'Desbanear' : 'Banear'}
+                          </button>
+                          <button 
+                            onClick={() => deleteUser(u.id)}
+                            className={styles.btnDanger}
+                            disabled={u.is_admin}
+                          >
+                            Eliminar
+                          </button>
                         </div>
                       </td>
                     </tr>
                   ))}
-                  {dbMatches.length === 0 && (
-                    <tr><td colSpan="5" style={{ textAlign: 'center' }}>No hay partidos en la base de datos.</td></tr>
+                  {users.length === 0 && (
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: 'center' }}>No hay usuarios.</td>
+                    </tr>
                   )}
                 </tbody>
               </table>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
+
       </div>
     </main>
   );
