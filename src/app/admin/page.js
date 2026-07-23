@@ -25,7 +25,7 @@ export default function AdminPage() {
   const [manualMatch, setManualMatch] = useState({
     home_team: '', away_team: '', score_home: '', score_away: '', 
     match_date: new Date().toISOString().slice(0, 16), 
-    tournament: `Primera División de Paraguay Clausura ${new Date().getFullYear()}`, round: 'Fecha 1', status: 'upcoming'
+    tournament: `Primera División de Paraguay`, phase: 'Clausura', matchday: 'Fecha 1', status: 'upcoming'
   });
 
   useEffect(() => {
@@ -148,6 +148,9 @@ export default function AdminPage() {
     try {
       const action = editingMatchId ? 'update_manual' : 'create_manual';
       const matchData = { ...manualMatch };
+      matchData.round = [manualMatch.phase, manualMatch.matchday].filter(Boolean).join(' - ');
+      delete matchData.phase;
+      delete matchData.matchday;
       if (editingMatchId) matchData.id = editingMatchId;
       
       const res = await fetch('/api/admin/matches', {
@@ -176,7 +179,20 @@ export default function AdminPage() {
       score_home: m.score_home !== null ? m.score_home : '', 
       score_away: m.score_away !== null ? m.score_away : '', 
       match_date: m.match_date ? new Date(m.match_date).toISOString().slice(0, 16) : '', 
-      tournament: m.tournament, round: m.round, status: m.status
+      tournament: m.tournament, 
+      phase: (() => {
+        const parts = (m.round || '').split(' - ');
+        if (parts.length === 2) return parts[0];
+        if (m.round?.includes('Clausura') || m.round?.includes('Apertura')) return m.round;
+        return '';
+      })(),
+      matchday: (() => {
+        const parts = (m.round || '').split(' - ');
+        if (parts.length === 2) return parts[1];
+        if (!m.round?.includes('Clausura') && !m.round?.includes('Apertura')) return m.round;
+        return '';
+      })(),
+      status: m.status
     });
     window.scrollTo(0, 0);
   };
@@ -199,7 +215,7 @@ export default function AdminPage() {
     setManualMatch({
       home_team: '', away_team: '', score_home: '', score_away: '', 
       match_date: new Date().toISOString().slice(0, 16), 
-      tournament: `Primera División de Paraguay Clausura ${new Date().getFullYear()}`, round: 'Fecha 1', status: 'upcoming'
+      tournament: `Primera División de Paraguay`, phase: 'Clausura', matchday: 'Fecha 1', status: 'upcoming'
     });
   };
 
@@ -319,8 +335,12 @@ export default function AdminPage() {
                     <input type="text" className={styles.input} value={manualMatch.tournament} onChange={e => setManualMatch({...manualMatch, tournament: e.target.value})} required />
                   </div>
                   <div className={styles.inputGroup}>
-                    <label>Jornada / Fecha</label>
-                    <input type="text" className={styles.input} value={manualMatch.round} onChange={e => setManualMatch({...manualMatch, round: e.target.value})} />
+                    <label>Jornada (Fase)</label>
+                    <input type="text" className={styles.input} value={manualMatch.phase} onChange={e => setManualMatch({...manualMatch, phase: e.target.value})} placeholder="Ej: Clausura" />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Fecha</label>
+                    <input type="text" className={styles.input} value={manualMatch.matchday} onChange={e => setManualMatch({...manualMatch, matchday: e.target.value})} placeholder="Ej: Fecha 1" />
                   </div>
                   <div className={styles.inputGroup}>
                     <label>Estado</label>
