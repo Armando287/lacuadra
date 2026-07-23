@@ -1,11 +1,27 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [username, setUsername] = useState(null);
+
+  useEffect(() => {
+    const name = localStorage.getItem('user_name');
+    if (name) {
+      setUsername(name);
+    }
+  }, [pathname]); // Refresh when route changes
+
+  const handleLogout = () => {
+    localStorage.removeItem('user_token');
+    localStorage.removeItem('user_name');
+    setUsername(null);
+    window.location.reload();
+  };
 
   return (
     <header className={styles.header}>
@@ -25,9 +41,19 @@ export default function Navbar() {
           <Link href="/rules" className={`${styles.link} ${pathname === '/rules' ? styles.active : ''}`}>
             Reglas
           </Link>
-          <Link href="/login" className="btn-primary">
-            Login
-          </Link>
+          
+          {username ? (
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <span style={{ color: '#fff', fontWeight: 'bold' }}>👤 {username}</span>
+              <button onClick={handleLogout} className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)', padding: '0.5rem 1rem' }}>
+                Salir
+              </button>
+            </div>
+          ) : (
+            <Link href="/login" className="btn-primary">
+              Login
+            </Link>
+          )}
         </div>
       </nav>
     </header>
