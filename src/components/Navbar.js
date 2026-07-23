@@ -9,23 +9,29 @@ export default function Navbar() {
   const pathname = usePathname();
   const [username, setUsername] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const name = localStorage.getItem('user_name');
+    const id = localStorage.getItem('user_token');
     if (name) {
       setUsername(name);
+    }
+    if (id) {
+      setUserId(id);
     }
     const adminFlag = localStorage.getItem('user_is_admin');
     if (adminFlag === 'true') {
       setIsAdmin(true);
     }
-  }, [pathname]); // Refresh when route changes
+  }, [pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('user_token');
     localStorage.removeItem('user_name');
     localStorage.removeItem('user_is_admin');
     setUsername(null);
+    setUserId(null);
     setIsAdmin(false);
     window.location.reload();
   };
@@ -56,7 +62,9 @@ export default function Navbar() {
           
           {username ? (
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <span style={{ color: '#fff', fontWeight: 'bold' }}>👤 {username}</span>
+              <Link href={`/profile/${userId}`} style={{ color: '#fff', fontWeight: 'bold', textDecoration: 'none' }} className={styles.profileLink}>
+                👤 {username}
+              </Link>
               <button onClick={handleLogout} className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)', padding: '0.5rem 1rem' }}>
                 Salir
               </button>

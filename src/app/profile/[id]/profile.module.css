@@ -1,0 +1,189 @@
+.main {
+  min-height: 100vh;
+  padding-bottom: 4rem;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: rgba(10, 10, 15, 0.6);
+  backdrop-filter: blur(20px);
+  min-height: 100vh;
+  box-shadow: 0 0 50px rgba(0,0,0,0.5);
+}
+
+.cover {
+  width: 100%;
+  height: 350px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.coverOverlay {
+  position: absolute;
+  bottom: 0; left: 0; width: 100%; height: 50%;
+  background: linear-gradient(to top, rgba(10,10,15,1), transparent);
+}
+
+.profileHeader {
+  display: flex;
+  align-items: flex-end;
+  padding: 0 2rem;
+  margin-top: -80px;
+  position: relative;
+  z-index: 10;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.avatarWrapper {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 4px solid var(--accent);
+  overflow: hidden;
+  background: #000;
+  flex-shrink: 0;
+  box-shadow: 0 10px 20px rgba(0,245,118,0.2);
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.headerDetails {
+  flex: 1;
+  min-width: 200px;
+  padding-bottom: 1rem;
+}
+
+.username {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+}
+
+.bio {
+  color: #ccc;
+  font-size: 1.1rem;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.actions {
+  padding-bottom: 1.5rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  padding: 0 2rem;
+  margin-bottom: 3rem;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-5px);
+  border-color: rgba(0,245,118,0.3);
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.friendsSection {
+  padding: 0 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 0.5rem;
+}
+
+.friendsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.friendCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.friendCard:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.friendAvatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.8rem;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.friendName {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.noFriends {
+  color: #888;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .profileHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .headerDetails {
+    padding-bottom: 0;
+  }
+  .cover {
+    height: 250px;
+  }
+  .avatarWrapper {
+    width: 130px;
+    height: 130px;
+    margin-top: -65px;
+  }
+}

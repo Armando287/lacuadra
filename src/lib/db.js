@@ -6,10 +6,12 @@ const dbPath = path.join(process.cwd(), 'database.json');
 export function readDB() {
   try {
     const data = fs.readFileSync(dbPath, 'utf8');
-    return JSON.parse(data);
+    const db = JSON.parse(data);
+    if (!db.friendships) db.friendships = [];
+    return db;
   } catch (error) {
     console.error("Error reading DB:", error);
-    return { users: [], matches: [], votes: [] };
+    return { users: [], matches: [], votes: [], friendships: [] };
   }
 }
 
