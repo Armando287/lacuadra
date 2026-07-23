@@ -64,6 +64,46 @@ export async function getGoogleMatches() {
     });
   }
 
+  const FALLBACK_LOGOS = {
+    // Faltantes del Vercel
+    "Rubio Ñu": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Escudo_Actual_del_Club_Rubio_%C3%91u_2026.png",
+    "Deportivo Recoleta": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Recoleta_Football_Club_logo_Paraguay_official_crest.png",
+    "Sportivo San Lorenzo": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Escudo_Sportivo_San_Lorenzo.png",
+    "Sportivo Luqueño": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/EscudoLuque2022.png/250px-EscudoLuque2022.png",
+    
+    // Todos los demás de Primera División (por si acaso Google falla)
+    "Cerro": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Escudo_Club_Cerro_Porte%C3%B1o_2023-Actual.svg/250px-Escudo_Club_Cerro_Porte%C3%B1o_2023-Actual.svg.png",
+    "Cerro Porteño": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Escudo_Club_Cerro_Porte%C3%B1o_2023-Actual.svg/250px-Escudo_Club_Cerro_Porte%C3%B1o_2023-Actual.svg.png",
+    "Olimpia": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Escudo_original_de_Olimpia.png/250px-Escudo_original_de_Olimpia.png",
+    "Libertad": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Club_Libertad.png/250px-Club_Libertad.png",
+    "Guaraní": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Guaran%C3%AD_Logo_2018.png/250px-Guaran%C3%AD_Logo_2018.png",
+    "Nacional": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Club_Nacional_de_Paraguay.png/250px-Club_Nacional_de_Paraguay.png",
+    "Nacional Asunción": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Club_Nacional_de_Paraguay.png/250px-Club_Nacional_de_Paraguay.png",
+    "Sportivo Trinidense": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Club_Sportivo_Trinidense.svg/250px-Club_Sportivo_Trinidense.svg.png",
+    "Trinidense": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Club_Sportivo_Trinidense.svg/250px-Club_Sportivo_Trinidense.svg.png",
+    "Tacuary": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Tacuary_-_FBC_-_1923.png/250px-Tacuary_-_FBC_-_1923.png",
+    "Sol de América": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Escudo_de_sol_de_am%C3%A9rica.png/250px-Escudo_de_sol_de_am%C3%A9rica.png",
+    "Sportivo Ameliano": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Club_Sportivo_Ameliano.png",
+    "General Caballero JLM": "https://upload.wikimedia.org/wikipedia/commons/8/87/Club_General_Caballero_%28JLM%29.png",
+    "General Caballero": "https://upload.wikimedia.org/wikipedia/commons/8/87/Club_General_Caballero_%28JLM%29.png",
+    "2 de Mayo": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Club_Sportivo_2_de_Mayo.png",
+    "Guaireña": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Guaire%C3%B1a_FC.png",
+    "Guaireña FC": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Guaire%C3%B1a_FC.png",
+    "Resistencia": "https://upload.wikimedia.org/wikipedia/commons/d/df/Resistencia_Sport_Club.png",
+    "Resistencia FC": "https://upload.wikimedia.org/wikipedia/commons/d/df/Resistencia_Sport_Club.png"
+  };
+
+  // Función para encontrar el logo ya sea por coincidencia exacta o parcial
+  const getFallbackLogo = (teamName) => {
+    if (!teamName) return "";
+    if (FALLBACK_LOGOS[teamName]) return FALLBACK_LOGOS[teamName];
+    // Buscar coincidencia parcial (ej. "Ameliano" -> "Sportivo Ameliano")
+    for (const [key, logo] of Object.entries(FALLBACK_LOGOS)) {
+      if (teamName.includes(key) || key.includes(teamName)) return logo;
+    }
+    return "";
+  };
+
   const games = data.sports_results.games;
   return games.map((game, index) => {
     const homeTeam = game.teams[0];
@@ -73,8 +113,11 @@ export async function getGoogleMatches() {
     if (game.status === 'Finalizado' || game.status === 'FT') status = 'finished';
     if (game.status === 'En juego' || game.status === 'En vivo') status = 'live';
 
+    const rawId = game.kgmid || game.tournament || 'liga';
+    const safeId = rawId.replace(/\//g, '-').replace(/\s+/g, '-');
+
     return {
-      id: `google_${index}_${game.kgmid || game.tournament}`,
+      id: `google_${index}_${safeId}`,
       homeTeam: homeTeam.name,
       awayTeam: awayTeam.name,
       tournament: game.tournament || data.sports_results.title || "Primera División",
@@ -83,8 +126,8 @@ export async function getGoogleMatches() {
       status: status,
       scoreHome: homeTeam.score ? parseInt(homeTeam.score) : null,
       scoreAway: awayTeam.score ? parseInt(awayTeam.score) : null,
-      homeLogo: logoMap[homeTeam.name] || homeTeam.thumbnail || "",
-      awayLogo: logoMap[awayTeam.name] || awayTeam.thumbnail || "",
+      homeLogo: logoMap[homeTeam.name] || getFallbackLogo(homeTeam.name) || homeTeam.thumbnail || "",
+      awayLogo: logoMap[awayTeam.name] || getFallbackLogo(awayTeam.name) || awayTeam.thumbnail || "",
       stadium: game.lugar || "Estadio Local"
     };
   });
