@@ -19,7 +19,8 @@ export default function AdminPage() {
 
   // States for Manual Matches Manager
   const [dbMatches, setDbMatches] = useState([]);
-  const [filterRound, setFilterRound] = useState('');
+  const [filterPhase, setFilterPhase] = useState('');
+  const [filterMatchday, setFilterMatchday] = useState('');
   const [editingMatchId, setEditingMatchId] = useState(null);
   const [manualMatch, setManualMatch] = useState({
     home_team: '', away_team: '', score_home: '', score_away: '', 
@@ -340,20 +341,46 @@ export default function AdminPage() {
               
               <div className={styles.tableContainer}>
                 
-                {/* FILTRO DE FECHAS */}
-                <div style={{ padding: '1rem', background: '#25262b', borderBottom: '1px solid #2C2D33', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <strong style={{ color: '#ccc' }}>Filtrar por Jornada:</strong>
-                  <select 
-                    className={styles.input} 
-                    style={{ maxWidth: '200px', marginBottom: 0 }} 
-                    value={filterRound} 
-                    onChange={e => setFilterRound(e.target.value)}
-                  >
-                    <option value="">Todos los partidos</option>
-                    {[...new Set(dbMatches.map(m => m.round))].filter(Boolean).map(round => (
-                      <option key={round} value={round}>{round}</option>
-                    ))}
-                  </select>
+                {/* FILTROS */}
+                <div style={{ padding: '1rem', background: '#25262b', borderBottom: '1px solid #2C2D33', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <strong style={{ color: '#ccc' }}>Filtrar por Jornada:</strong>
+                    <select 
+                      className={styles.input} 
+                      style={{ maxWidth: '200px', marginBottom: 0 }} 
+                      value={filterPhase} 
+                      onChange={e => setFilterPhase(e.target.value)}
+                    >
+                      <option value="">Todas las jornadas</option>
+                      {[...new Set(dbMatches.map(m => {
+                        const parts = (m.round || '').split(' - ');
+                        if (parts.length === 2) return parts[0];
+                        if (m.round?.includes('Clausura') || m.round?.includes('Apertura')) return m.round;
+                        return '';
+                      }))].filter(Boolean).map(phase => (
+                        <option key={phase} value={phase}>{phase}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <strong style={{ color: '#ccc' }}>Filtrar por Fecha:</strong>
+                    <select 
+                      className={styles.input} 
+                      style={{ maxWidth: '200px', marginBottom: 0 }} 
+                      value={filterMatchday} 
+                      onChange={e => setFilterMatchday(e.target.value)}
+                    >
+                      <option value="">Todas las fechas</option>
+                      {[...new Set(dbMatches.map(m => {
+                        const parts = (m.round || '').split(' - ');
+                        if (parts.length === 2) return parts[1];
+                        if (!m.round?.includes('Clausura') && !m.round?.includes('Apertura')) return m.round;
+                        return '';
+                      }))].filter(Boolean).map(md => (
+                        <option key={md} value={md}>{md}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <table className={styles.table}>
@@ -364,11 +391,45 @@ export default function AdminPage() {
                       <th>Estado</th>
                       <th>Torneo</th>
                       <th>Jornada</th>
+                      <th>Fecha</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {dbMatches.filter(m => filterRound === '' || m.round === filterRound).map(m => (
+                    {dbMatches.filter(m => {
+                      const parts = (m.round || '').split(' - ');
+                      let mPhase = '';
+                      let mMatchday = '';
+                      if (parts.length === 2) {
+                        mPhase = parts[0];
+                        mMatchday = parts[1];
+                      } else {
+                        if (m.round?.includes('Clausura') || m.round?.includes('Apertura')) {
+                          mPhase = m.round;
+                        } else {
+                          mMatchday = m.round;
+                        }
+                      }
+                      
+                      const matchPhase = filterPhase === '' || mPhase === filterPhase;
+                      const matchMatchday = filterMatchday === '' || mMatchday === filterMatchday;
+                      return matchPhase && matchMatchday;
+                    }).map(m => {
+                      const parts = (m.round || '').split(' - ');
+                      let mPhase = '';
+                      let mMatchday = '';
+                      if (parts.length === 2) {
+                        mPhase = parts[0];
+                        mMatchday = parts[1].replace('Fecha ', '');
+                      } else {
+                        if (m.round?.includes('Clausura') || m.round?.includes('Apertura')) {
+                          mPhase = m.round;
+                        } else {
+                          mMatchday = (m.round || '').replace('Fecha ', '');
+                        }
+                      }
+                      
+                      return (
                       <tr key={m.id}>
                         <td>{new Date(m.match_date).toLocaleString()}</td>
                         <td>
@@ -376,7 +437,8 @@ export default function AdminPage() {
                         </td>
                         <td>{m.status}</td>
                         <td>{m.tournament}</td>
-                        <td>{m.round}</td>
+                        <td>{mPhase}</td>
+                        <td>{mMatchday}</td>
                         <td>
                           <div className={styles.actions}>
                             <button className={styles.btnWarning} onClick={() => editMatch(m)}>Editar</button>
@@ -384,9 +446,24 @@ export default function AdminPage() {
                           </div>
                         </td>
                       </tr>
-                    ))}
-                    {dbMatches.filter(m => filterRound === '' || m.round === filterRound).length === 0 && (
-                      <tr><td colSpan="6" style={{ textAlign: 'center' }}>No hay partidos que coincidan con el filtro.</td></tr>
+                    )})}
+                    {dbMatches.filter(m => {
+                      const parts = (m.round || '').split(' - ');
+                      let mPhase = '';
+                      let mMatchday = '';
+                      if (parts.length === 2) {
+                        mPhase = parts[0];
+                        mMatchday = parts[1];
+                      } else {
+                        if (m.round?.includes('Clausura') || m.round?.includes('Apertura')) {
+                          mPhase = m.round;
+                        } else {
+                          mMatchday = m.round;
+                        }
+                      }
+                      return (filterPhase === '' || mPhase === filterPhase) && (filterMatchday === '' || mMatchday === filterMatchday);
+                    }).length === 0 && (
+                      <tr><td colSpan="7" style={{ textAlign: 'center' }}>No hay partidos que coincidan con el filtro.</td></tr>
                     )}
                   </tbody>
                 </table>

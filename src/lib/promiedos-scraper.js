@@ -112,7 +112,11 @@ export async function getPromiedosMatches() {
       if (filter.key === 'latest') continue;
       
       const games = parseGames(filter.games, roundName);
-      const mappedGames = games.map(g => ({ ...g, tournament: `Primera División de Paraguay ${phase}` }));
+      const mappedGames = games.map(g => ({ 
+        ...g, 
+        tournament: 'Primera División de Paraguay',
+        round: `${phase} - ${g.round}`
+      }));
       allMatches.push(...mappedGames);
     }
     
@@ -176,12 +180,10 @@ export async function getPromiedosMatchesByRound(filterKey, phase = '') {
     // Convertir al mismo formato usando parseGames
     const games = parseGames(gamesRaw);
     
-    // Re-mapear el torneo con la fase correcta (ej: Primera División de Paraguay Clausura)
-    const tournamentName = phase ? `Primera División de Paraguay ${phase}` : 'Primera División de Paraguay';
-    
     return games.map(g => ({
       ...g,
-      tournament: tournamentName
+      tournament: 'Primera División de Paraguay',
+      round: phase ? `${phase} - ${g.round}` : g.round
     }));
   } catch (error) {
     console.error("Error fetching round:", error);
