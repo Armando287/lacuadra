@@ -33,7 +33,7 @@ export async function POST(request) {
   try {
     const { user_id, content, media_url, media_type } = await request.json();
 
-    if (!user_id || !content) {
+    if (!user_id || (!content && !media_url)) {
       return NextResponse.json({ success: false, error: 'Missing fields' }, { status: 400 });
     }
 
@@ -55,7 +55,7 @@ export async function POST(request) {
 
     // 2. Moderation Bot Logic (Text Filter)
     const badWords = ['porno', 'puta', 'puto', 'mierda', 'fraude', 'sorteo falso', 'estafa', 'desnudo', 'sexo'];
-    const lowerContent = content.toLowerCase();
+    const lowerContent = (content || '').toLowerCase();
     
     // Check if content contains any bad words
     const isBad = badWords.some(word => lowerContent.includes(word));
