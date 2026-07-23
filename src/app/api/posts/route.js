@@ -31,7 +31,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const { user_id, content } = await request.json();
+    const { user_id, content, media_url, media_type } = await request.json();
 
     if (!user_id || !content) {
       return NextResponse.json({ success: false, error: 'Missing fields' }, { status: 400 });
@@ -39,7 +39,7 @@ export async function POST(request) {
 
     const { data, error } = await supabase
       .from('posts')
-      .insert([{ user_id, content }])
+      .insert([{ user_id, content, media_url, media_type }])
       .select('*, user:users(username, avatar_url)')
       .single();
 

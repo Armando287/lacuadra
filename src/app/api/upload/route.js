@@ -27,12 +27,19 @@ export async function POST(request) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const filename = uniqueSuffix + '-' + file.name.replace(/\s+/g, '_');
 
-    let contentType = 'image/jpeg';
-    if (filename.toLowerCase().endsWith('.png')) contentType = 'image/png';
-    else if (filename.toLowerCase().endsWith('.gif')) contentType = 'image/gif';
-    else if (filename.toLowerCase().endsWith('.webp')) contentType = 'image/webp';
-
-
+    let contentType = 'application/octet-stream';
+    const lowerName = filename.toLowerCase();
+    
+    // Images
+    if (lowerName.endsWith('.png')) contentType = 'image/png';
+    else if (lowerName.endsWith('.gif')) contentType = 'image/gif';
+    else if (lowerName.endsWith('.webp')) contentType = 'image/webp';
+    else if (lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) contentType = 'image/jpeg';
+    
+    // Videos
+    else if (lowerName.endsWith('.mp4')) contentType = 'video/mp4';
+    else if (lowerName.endsWith('.webm')) contentType = 'video/webm';
+    else if (lowerName.endsWith('.mov')) contentType = 'video/quicktime';
 
     const command = new PutObjectCommand({
       Bucket: 'lacuadra_uploads',
@@ -46,7 +53,7 @@ export async function POST(request) {
     // Instead of giving the public S3 url, we will return our proxy URL
     const proxyUrl = `/api/proxy/image?file=${filename}`;
 
-    return NextResponse.json({ success: true, url: proxyUrl });
+    return NextResponse.json({ success: true, url: proxyUrl, contentType: contentType });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

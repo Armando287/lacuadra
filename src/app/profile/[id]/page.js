@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 import styles from './profile.module.css';
 
 export default function PublicProfile() {
@@ -16,10 +17,12 @@ export default function PublicProfile() {
   
   const [loading, setLoading] = useState(true);
   const [debugMsg, setDebugMsg] = useState("");
-  const [activeTab, setActiveTab] = useState('muro'); // muro, amigos, info
+  const [activeTab, setActiveTab] = useState('muro'); 
   
   const [newPostContent, setNewPostContent] = useState('');
+  const [mediaFile, setMediaFile] = useState(null);
   const [posting, setPosting] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const loggedInId = localStorage.getItem('user_token');
@@ -63,6 +66,7 @@ export default function PublicProfile() {
   };
 
   const handleFriendAction = async (action, requestData = null) => {
+    const toastId = toast.loading('Procesando solicitud...');
     try {
       let url = '/api/friends';
       let method = 'POST';
@@ -81,31 +85,94 @@ export default function PublicProfile() {
         body: JSON.stringify(body)
       });
       const data = await res.json();
+      
       if (data.success) {
+        toast.success(
+          action === 'add' ? 'Solicitud enviada' : 
+          action === 'accept' ? 'Amigo añadido' : 'Solicitud rechazada',
+          { id: toastId }
+        );
         fetchData();
+      } else {
+        toast.error(`Error: ${data.error}`, { id: toastId });
       }
     } catch (error) {
       console.error("Error managing friend:", error);
+      toast.error('Ocurrió un error inesperado', { id: toastId });
     }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Check size limit (50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('El archivo excede el límite de 50MB');
+      e.target.value = '';
+      return;
+    }
+    setMediaFile(file);
   };
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
-    if (!newPostContent.trim()) return;
+    if (!newPostContent.trim() && !mediaFile) return;
+    
+    const toastId = toast.loading('Publicando en tu muro...');
     setPosting(true);
+    
     try {
+      let media_url = null;
+      let media_type = null;
+
+      // 1. Upload media if exists
+      if (mediaFile) {
+        toast.loading('Subiendo archivo...', { id: toastId });
+        const formData = new FormData();
+        formData.append('file', mediaFile);
+        
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        
+        if (!uploadData.success) {
+          throw new Error(`Error al subir: ${uploadData.error}`);
+        }
+        
+        media_url = uploadData.url;
+        media_type = uploadData.contentType;
+      }
+
+      // 2. Create Post
+      toast.loading('Guardando post...', { id: toastId });
       const res = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: currentUserId, content: newPostContent })
+        body: JSON.stringify({ 
+          user_id: currentUserId, 
+          content: newPostContent,
+          media_url,
+          media_type
+        })
       });
       const data = await res.json();
+      
       if (data.success) {
         setNewPostContent('');
+        setMediaFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        
         setPosts([data.post, ...posts]);
+        toast.success('¡Publicado con éxito!', { id: toastId });
+      } else {
+        throw new Error(data.error);
       }
     } catch (error) {
       console.error(error);
+      toast.error(error.message || 'Error al publicar', { id: toastId });
     } finally {
       setPosting(false);
     }
@@ -215,8 +282,26 @@ export default function PublicProfile() {
                     className={styles.postInput}
                   />
                 </div>
+                
+                {mediaFile && (
+                  <div style={{ padding: '10px 10px 10px 60px', color: 'var(--accent)', fontSize: '0.9rem' }}>
+                    📎 Archivo adjunto: {mediaFile.name}
+                  </div>
+                )}
+
                 <div className={styles.createPostActions}>
-                  <button type="submit" className="btn-primary" disabled={posting || !newPostContent.trim()}>
+                  <label className="btn-secondary" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 15px', fontSize: '0.9rem', marginRight: 'auto' }}>
+                    <span>📎 Foto/Video</span>
+                    <input 
+                      type="file" 
+                      accept="image/*,video/*" 
+                      style={{ display: 'none' }}
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                    />
+                  </label>
+
+                  <button type="submit" className="btn-primary" disabled={posting || (!newPostContent.trim() && !mediaFile)}>
                     {posting ? 'Publicando...' : 'Publicar'}
                   </button>
                 </div>
@@ -229,15 +314,33 @@ export default function PublicProfile() {
                 posts.map(post => (
                   <div key={post.id} className={`glass-panel ${styles.postCard}`}>
                     <div className={styles.postHeader}>
-                      <img src={post.user.avatar_url || '/logo.png'} className={styles.smallAvatar} />
+                      <img src={post.user?.avatar_url || '/logo.png'} className={styles.smallAvatar} />
                       <div className={styles.postMeta}>
-                        <span className={styles.postAuthor}>{post.user.username}</span>
+                        <span className={styles.postAuthor}>{post.user?.username || 'Usuario'}</span>
                         <span className={styles.postDate}>{new Date(post.created_at).toLocaleString()}</span>
                       </div>
                     </div>
-                    <div className={styles.postContent}>
-                      {post.content}
-                    </div>
+                    
+                    {post.content && (
+                      <div className={styles.postContent} style={{ marginBottom: post.media_url ? '1rem' : '0' }}>
+                        {post.content}
+                      </div>
+                    )}
+
+                    {post.media_url && (
+                      <div className={styles.postMediaContainer}>
+                        {post.media_type?.startsWith('video/') ? (
+                          <video 
+                            src={post.media_url} 
+                            controls 
+                            className={styles.postMedia}
+                            preload="metadata"
+                          />
+                        ) : (
+                          <img src={post.media_url} className={styles.postMedia} alt="Post media" />
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (

@@ -36,10 +36,16 @@ export async function GET(request) {
     const arrayBuffer = await hfRes.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    let contentType = 'image/jpeg';
-    if (file.toLowerCase().endsWith('.png')) contentType = 'image/png';
-    else if (file.toLowerCase().endsWith('.gif')) contentType = 'image/gif';
-    else if (file.toLowerCase().endsWith('.webp')) contentType = 'image/webp';
+    let contentType = 'application/octet-stream';
+    const lowerFile = file.toLowerCase();
+    
+    if (lowerFile.endsWith('.png')) contentType = 'image/png';
+    else if (lowerFile.endsWith('.gif')) contentType = 'image/gif';
+    else if (lowerFile.endsWith('.webp')) contentType = 'image/webp';
+    else if (lowerFile.endsWith('.jpg') || lowerFile.endsWith('.jpeg')) contentType = 'image/jpeg';
+    else if (lowerFile.endsWith('.mp4')) contentType = 'video/mp4';
+    else if (lowerFile.endsWith('.webm')) contentType = 'video/webm';
+    else if (lowerFile.endsWith('.mov')) contentType = 'video/quicktime';
 
     return new NextResponse(buffer, {
       headers: {

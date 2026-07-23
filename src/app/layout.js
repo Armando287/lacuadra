@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import ToastProvider from "@/components/ToastProvider";
 import "./globals.css";
 
 export const metadata = {
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
     <html lang="es">
       <body>
         <Navbar />
+        <ToastProvider />
         {children}
       </body>
     </html>
