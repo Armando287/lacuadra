@@ -123,7 +123,7 @@ export default function EditProfile() {
       }
     } catch (error) {
       console.error(error);
-      setMessage('❌ Ocurrió un error al guardar el perfil.');
+      setMessage(`❌ Error: ${error.message || 'Ocurrió un error al guardar el perfil.'}`);
     } finally {
       setSaving(false);
     }

@@ -4,15 +4,16 @@ import path from 'path';
 
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-key';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 async function check() {
-  const { data, error } = await supabase.from('users').select('*').limit(3);
-  console.log("Users:", data);
-  if (error) console.log("Error:", error);
+  const { data: users } = await supabase.from('users').select('id').limit(1);
+  if (!users || users.length === 0) return console.log("No users found");
+  
+  const id = users[0].id;
+  console.log("Updating user:", id);
+  const { data, error } = await supabase.from('users').update({ bio: 'test' }).eq('id', id);
+  console.log("Update Error:", error);
 }
 
 check();

@@ -7,9 +7,13 @@ import styles from './page.module.css';
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [matches, setMatches] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    if (localStorage.getItem('user_token')) {
+      setIsLoggedIn(true);
+    }
     fetch('/api/matches')
       .then(res => res.json())
       .then(data => {
@@ -65,7 +69,7 @@ export default function Home() {
           Demuestra cuánto sabes de fútbol paraguayo. Predice resultados, suma puntos y sube en el ranking global.
         </p>
         <div className={styles.ctaGroup}>
-          <Link href="/login" className={`btn-primary ${styles.glowBtn}`}>
+          <Link href={isLoggedIn ? "/matches" : "/login"} className={`btn-primary ${styles.glowBtn}`}>
             Jugar Ahora
           </Link>
           <Link href="/matches" className="btn-secondary">

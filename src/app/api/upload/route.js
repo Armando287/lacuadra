@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+const s3 = new S3Client({
+  region: 'us-east-1',
+  endpoint: 'https://s3.hf.co/infovips',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+  forcePathStyle: true
+});
 
 export async function POST(request) {
   try {
@@ -8,37 +17,40 @@ export async function POST(request) {
     const file = formData.get('file');
 
     if (!file) {
-      return NextResponse.json({ success: false, error: 'No file received.' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
     }
 
-    // Convert file to buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Create a unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const extension = file.name.split('.').pop();
-    const filename = `file_${uniqueSuffix}.${extension}`;
-
-    // Define the upload path
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
     
-    // Ensure directory exists
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    // Generate a unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const filename = uniqueSuffix + '-' + file.name.replace(/\s+/g, '_');
+
+    let contentType = 'image/jpeg';
+    if (filename.toLowerCase().endsWith('.png')) contentType = 'image/png';
+    else if (filename.toLowerCase().endsWith('.gif')) contentType = 'image/gif';
+    else if (filename.toLowerCase().endsWith('.webp')) contentType = 'image/webp';
+
+    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+      return NextResponse.json({ success: false, error: 'Faltan credenciales AWS_ACCESS_KEY_ID en el servidor.' }, { status: 500 });
     }
 
-    const filepath = path.join(uploadDir, filename);
+    const command = new PutObjectCommand({
+      Bucket: 'lacuadra_uploads',
+      Key: filename,
+      Body: buffer,
+      ContentType: contentType,
+    });
 
-    // Save the file
-    fs.writeFileSync(filepath, buffer);
+    await s3.send(command);
 
-    // Return the URL path
-    const url = `/uploads/${filename}`;
+    // Instead of giving the public S3 url, we will return our proxy URL
+    const proxyUrl = `/api/proxy/image?file=${filename}`;
 
-    return NextResponse.json({ success: true, url });
+    return NextResponse.json({ success: true, url: proxyUrl });
   } catch (error) {
-    console.error('Error uploading file:', error);
-    return NextResponse.json({ success: false, error: 'Error uploading file.' }, { status: 500 });
+    console.error("Upload error:", error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
