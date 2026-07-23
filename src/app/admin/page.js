@@ -10,13 +10,12 @@ export default function AdminPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // States for Matches Fetcher
-  const [liga, setLiga] = useState('Primera División de Paraguay');
-  const [fase, setFase] = useState('Clausura');
-  const [ano, setAno] = useState(new Date().getFullYear().toString());
-  const [jornada, setJornada] = useState('Fecha 1');
+  // States for Matches Fetcher (Promiedos)
+  const [availableRounds, setAvailableRounds] = useState([]);
+  const [selectedRound, setSelectedRound] = useState('');
   const [isFetchingMatches, setIsFetchingMatches] = useState(false);
   const [matchMessage, setMatchMessage] = useState('');
+  const [isLoadingRounds, setIsLoadingRounds] = useState(false);
 
   // States for Manual Matches Manager
   const [dbMatches, setDbMatches] = useState([]);
@@ -37,6 +36,7 @@ export default function AdminPage() {
 
     fetchUsers();
     fetchMatches();
+    fetchRounds();
   }, [router]);
 
   const fetchUsers = async () => {
@@ -82,28 +82,45 @@ export default function AdminPage() {
     } catch (e) { console.error(e); }
   };
 
+  const fetchRounds = async () => {
+    setIsLoadingRounds(true);
+    try {
+      const res = await fetch('/api/admin/matches?action=get_rounds');
+      const data = await res.json();
+      if (data.success && data.rounds) {
+        setAvailableRounds(data.rounds);
+        // Seleccionar por defecto la primera ronda que tiene partidos
+        const activeRound = data.rounds.find(r => r.hasGames);
+        if (activeRound) setSelectedRound(activeRound.key);
+      }
+    } catch (e) {
+      console.error('Error cargando rondas:', e);
+    }
+    setIsLoadingRounds(false);
+  };
+
   const handleFetchMatches = async (e) => {
     e.preventDefault();
     setIsFetchingMatches(true);
     setMatchMessage('');
     try {
-      let fullTournament = fase ? `${liga} ${fase}` : liga;
-      if (ano) fullTournament = `${fullTournament} ${ano}`;
-
       const res = await fetch('/api/admin/matches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'fetch_google', tournament: fullTournament, round: jornada })
+        body: JSON.stringify({ 
+          action: 'fetch_promiedos', 
+          filterKey: selectedRound || undefined
+        })
       });
       const data = await res.json();
       if (data.success) {
-        setMatchMessage(`Sincronización exitosa. Se guardaron ${data.saved || data.count} partidos en la base de datos.`);
+        setMatchMessage(`✅ Sincronización exitosa. Se guardaron ${data.count} partidos de Promiedos.`);
         fetchMatches();
       } else {
-        setMatchMessage(`Error al sincronizar: ${data.error}`);
+        setMatchMessage(`❌ Error: ${data.error}`);
       }
     } catch (e) {
-      setMatchMessage('Ocurrió un error al contactar con la API.');
+      setMatchMessage('❌ Ocurrió un error al contactar con Promiedos.');
     }
     setIsFetchingMatches(false);
   };
@@ -195,7 +212,7 @@ export default function AdminPage() {
           className={`${styles.tabBtn} ${activeTab === 'sync' ? styles.tabBtnActive : ''}`}
           onClick={() => setActiveTab('sync')}
         >
-          🔄 Sincronizar API
+          🔄 Sincronizar Promiedos
         </button>
         
         <button 
@@ -219,58 +236,39 @@ export default function AdminPage() {
         {/* TAB 1: MATCHES SYNC */}
         {activeTab === 'sync' && (
           <section className={styles.panel}>
-            <h2>Sincronizar Partidos</h2>
+            <h2>⚽ Sincronizar desde Promiedos</h2>
             <p style={{ marginBottom: '1.5rem', color: '#ccc', lineHeight: '1.6' }}>
-              Usa esta herramienta para buscar los partidos de esta semana en Google y guardarlos.
-              Llena los campos abajo para forzar la etiqueta de la fecha.
+              Seleccioná la fecha/jornada de la Copa de Primera de Paraguay y se extraerán los partidos directamente desde <strong style={{ color: '#4ecdc4' }}>Promiedos.com.ar</strong>.
             </p>
             <form onSubmit={handleFetchMatches} className={styles.form}>
               <div className={styles.inputGroup}>
-                <label>Liga / País</label>
-                <input 
-                  type="text" 
-                  value={liga} 
-                  onChange={(e) => setLiga(e.target.value)} 
-                  required 
-                  className={styles.input}
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <div className={styles.inputGroup} style={{ flex: 2 }}>
-                  <label>Fase (Apertura / Clausura)</label>
-                  <input 
-                    type="text" 
-                    value={fase} 
-                    onChange={(e) => setFase(e.target.value)} 
-                    placeholder="Ej. Clausura"
+                <label>Fecha / Jornada</label>
+                {isLoadingRounds ? (
+                  <p style={{ color: '#aaa' }}>Cargando fechas disponibles...</p>
+                ) : (
+                  <select 
+                    value={selectedRound} 
+                    onChange={(e) => setSelectedRound(e.target.value)} 
                     className={styles.input}
-                  />
-                </div>
-                <div className={styles.inputGroup} style={{ flex: 1 }}>
-                  <label>Año</label>
-                  <input 
-                    type="number" 
-                    value={ano} 
-                    onChange={(e) => setAno(e.target.value)} 
-                    required
-                    className={styles.input}
-                  />
-                </div>
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <option value="">-- Fecha activa (actual) --</option>
+                    {availableRounds.map(r => (
+                      <option key={r.key} value={r.key}>
+                        {r.name} {r.hasGames ? '✅' : ''}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
-              <div className={styles.inputGroup}>
-                <label>Jornada (Ej: Fecha 2)</label>
-                <input 
-                  type="text" 
-                  value={jornada} 
-                  onChange={(e) => setJornada(e.target.value)} 
-                  placeholder="Ej. Fecha 2"
-                  required
-                  className={styles.input}
-                />
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <button type="submit" className="btn-primary" disabled={isFetchingMatches} style={{ marginTop: '1rem', padding: '1rem', flex: 1 }}>
+                  {isFetchingMatches ? '⏳ Extrayendo de Promiedos...' : '🔄 Extraer y Guardar Partidos'}
+                </button>
+                <button type="button" className="btn-primary" onClick={fetchRounds} disabled={isLoadingRounds} style={{ marginTop: '1rem', padding: '1rem', background: '#333' }}>
+                  🔃 Refrescar Fechas
+                </button>
               </div>
-              <button type="submit" className="btn-primary" disabled={isFetchingMatches} style={{ marginTop: '1rem', padding: '1rem' }}>
-                {isFetchingMatches ? 'Buscando y Sincronizando...' : 'Extraer de Google y Guardar'}
-              </button>
             </form>
             {matchMessage && (
               <div className={styles.messageBlock}>

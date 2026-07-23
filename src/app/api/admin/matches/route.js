@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getGoogleMatches } from '@/lib/serpapi-scraper';
+import { getPromiedosMatches, getPromiedosMatchesByRound, getPromiedosRounds } from '@/lib/promiedos-scraper';
 
 // GET all matches for admin table
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get('action');
+
+    // Si piden las rondas disponibles de Promiedos
+    if (action === 'get_rounds') {
+      const rounds = await getPromiedosRounds();
+      return NextResponse.json({ success: true, rounds });
+    }
+
     const { data: matches, error } = await supabase.from('matches').select('*').order('match_date', { ascending: false });
     if (error) throw error;
     return NextResponse.json({ success: true, matches });
@@ -16,22 +25,27 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { action, round, tournament, match } = body;
+    const { action, round, tournament, match, filterKey } = body;
 
-    if (action === 'fetch_google') {
-      const apiMatches = await getGoogleMatches();
+    if (action === 'fetch_promiedos') {
+      let apiMatches;
       
-      let matchesToInsert = apiMatches;
-
-      if (matchesToInsert.length === 0) {
-        return NextResponse.json({ success: false, error: 'No se encontraron partidos en Google.' });
+      // Si se especificó un filterKey, traer esa fecha específica
+      if (filterKey) {
+        apiMatches = await getPromiedosMatchesByRound(filterKey);
+      } else {
+        // Si no, traer la fecha activa (actual)
+        apiMatches = await getPromiedosMatches();
+      }
+      
+      if (apiMatches.length === 0) {
+        return NextResponse.json({ success: false, error: 'No se encontraron partidos en Promiedos para esta fecha.' });
       }
 
-      const dbPayload = matchesToInsert.map(m => ({
+      const dbPayload = apiMatches.map(m => ({
         id: m.id,
         home_team: m.homeTeam,
         away_team: m.awayTeam,
-        // Overrides the scraped values with the ones typed by the admin
         tournament: tournament || m.tournament,
         round: round || m.round,
         match_date: m.date,
@@ -50,6 +64,7 @@ export async function POST(request) {
       if (error) throw error;
       return NextResponse.json({ success: true, count: data.length, matches: data });
     }
+
 
     if (action === 'create_manual' || action === 'update_manual') {
       if (!match) return NextResponse.json({ success: false, error: 'Datos del partido requeridos.' });
