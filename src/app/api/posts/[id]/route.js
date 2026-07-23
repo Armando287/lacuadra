@@ -29,7 +29,8 @@ async function deleteFromS3(fileUrl) {
 // EDIT post content
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const body = await request.json();
     const { content, user_id } = body;
 
@@ -65,7 +66,8 @@ export async function PUT(request, { params }) {
 // DELETE post
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('user_id');
 
