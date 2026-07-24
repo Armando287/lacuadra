@@ -174,7 +174,7 @@ export default function PublicProfile() {
         let fileToUpload = mediaFile;
         try { fileToUpload = await compressImage(mediaFile); } catch (e) { console.warn("Compression failed", e); }
         
-        const CHUNK_SIZE = 4 * 1024 * 1024; // 4MB
+        const CHUNK_SIZE = 6 * 1024 * 1024; // 6MB (AWS S3 minimum is 5MB)
         
         if (fileToUpload.size > CHUNK_SIZE) {
           // MULTIPART UPLOAD
