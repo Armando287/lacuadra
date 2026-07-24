@@ -174,26 +174,87 @@ export default function PublicProfile() {
         let fileToUpload = mediaFile;
         try { fileToUpload = await compressImage(mediaFile); } catch (e) { console.warn("Compression failed", e); }
         
-        const formData = new FormData();
-        formData.append('file', fileToUpload);
+        const CHUNK_SIZE = 4 * 1024 * 1024; // 4MB
         
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData
-        });
-        
-        if (!uploadRes.ok) {
-          const text = await uploadRes.text();
-          throw new Error(`Upload failed: ${text.substring(0, 40)}`);
+        if (fileToUpload.size > CHUNK_SIZE) {
+          // MULTIPART UPLOAD
+          // Start
+          let contentType = 'application/octet-stream';
+          const lowerName = fileToUpload.name.toLowerCase();
+          if (lowerName.endsWith('.mp4')) contentType = 'video/mp4';
+          else if (lowerName.endsWith('.webm')) contentType = 'video/webm';
+          else if (lowerName.endsWith('.mov')) contentType = 'video/quicktime';
+          else if (lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) contentType = 'image/jpeg';
+          else if (lowerName.endsWith('.png')) contentType = 'image/png';
+          
+          const startRes = await fetch('/api/upload?action=start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: fileToUpload.name, contentType })
+          });
+          const startData = await startRes.json();
+          if (!startData.success) throw new Error("Fallo al iniciar subida");
+          
+          const { uploadId, filename: safeFilename } = startData;
+          const totalChunks = Math.ceil(fileToUpload.size / CHUNK_SIZE);
+          const parts = [];
+
+          // Upload parts sequentially
+          for (let i = 0; i < totalChunks; i++) {
+            toast.loading(`Subiendo archivo... (Parte ${i + 1} de ${totalChunks})`, { id: toastId });
+            const chunk = fileToUpload.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            const partFormData = new FormData();
+            partFormData.append('file', chunk);
+            partFormData.append('uploadId', uploadId);
+            partFormData.append('filename', safeFilename);
+            partFormData.append('partNumber', i + 1);
+
+            const partRes = await fetch('/api/upload?action=uploadPart', {
+              method: 'POST',
+              body: partFormData
+            });
+            const partData = await partRes.json();
+            if (!partData.success) throw new Error("Fallo al subir parte " + (i + 1));
+            
+            parts.push({ PartNumber: i + 1, ETag: partData.ETag });
+          }
+
+          // Complete
+          toast.loading('Ensamblando archivo...', { id: toastId });
+          const completeRes = await fetch('/api/upload?action=complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uploadId, filename: safeFilename, parts, contentType })
+          });
+          const completeData = await completeRes.json();
+          if (!completeData.success) throw new Error("Fallo al ensamblar archivo");
+
+          media_url = completeData.url;
+          media_type = completeData.contentType;
+
+        } else {
+          // SINGLE UPLOAD
+          const formData = new FormData();
+          formData.append('file', fileToUpload);
+          
+          const uploadRes = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          });
+          
+          if (!uploadRes.ok) {
+            const text = await uploadRes.text();
+            throw new Error(`Upload failed: ${text.substring(0, 40)}`);
+          }
+          const uploadData = await uploadRes.json();
+          
+          if (!uploadData.success) {
+            throw new Error(`Error al subir: ${uploadData.error}`);
+          }
+          
+          media_url = uploadData.url;
+          media_type = uploadData.contentType;
         }
-        const uploadData = await uploadRes.json();
-        
-        if (!uploadData.success) {
-          throw new Error(`Error al subir: ${uploadData.error}`);
-        }
-        
-        media_url = uploadData.url;
-        media_type = uploadData.contentType;
       }
 
       // 2. Create Post

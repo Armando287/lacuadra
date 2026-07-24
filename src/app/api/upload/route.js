@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, CompleteMultipartUploadCommand } from '@aws-sdk/client-s3';
 
 const s3 = new S3Client({
   region: 'us-east-1',
@@ -13,6 +13,62 @@ const s3 = new S3Client({
 
 export async function POST(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get('action');
+
+    if (action === 'start') {
+      const { filename, contentType } = await request.json();
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const safeFilename = uniqueSuffix + '-' + filename.replace(/\\s+/g, '_');
+      
+      const command = new CreateMultipartUploadCommand({
+        Bucket: 'lacuadra_uploads',
+        Key: safeFilename,
+        ContentType: contentType,
+      });
+      const res = await s3.send(command);
+      return NextResponse.json({ success: true, uploadId: res.UploadId, filename: safeFilename });
+    }
+
+    if (action === 'uploadPart') {
+      const formData = await request.formData();
+      const file = formData.get('file');
+      const uploadId = formData.get('uploadId');
+      const filename = formData.get('filename');
+      const partNumber = parseInt(formData.get('partNumber'), 10);
+      
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const command = new UploadPartCommand({
+        Bucket: 'lacuadra_uploads',
+        Key: filename,
+        UploadId: uploadId,
+        PartNumber: partNumber,
+        Body: buffer,
+      });
+      const res = await s3.send(command);
+      return NextResponse.json({ success: true, ETag: res.ETag });
+    }
+
+    if (action === 'complete') {
+      const { uploadId, filename, parts, contentType } = await request.json();
+      
+      const command = new CompleteMultipartUploadCommand({
+        Bucket: 'lacuadra_uploads',
+        Key: filename,
+        UploadId: uploadId,
+        MultipartUpload: {
+          Parts: parts,
+        },
+      });
+      await s3.send(command);
+      
+      const proxyUrl = `/api/proxy/image?file=${filename}`;
+      return NextResponse.json({ success: true, url: proxyUrl, contentType });
+    }
+
+    // Default: Single part upload for backwards compatibility
     const formData = await request.formData();
     const file = formData.get('file');
 
@@ -25,7 +81,7 @@ export async function POST(request) {
     
     // Generate a unique filename
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const filename = uniqueSuffix + '-' + file.name.replace(/\s+/g, '_');
+    const filename = uniqueSuffix + '-' + file.name.replace(/\\s+/g, '_');
 
     let contentType = 'application/octet-stream';
     const lowerName = filename.toLowerCase();
