@@ -192,6 +192,10 @@ export default function PublicProfile() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ filename: fileToUpload.name, contentType })
           });
+          if (!startRes.ok) {
+            const txt = await startRes.text();
+            throw new Error(`Error del servidor: ${txt.substring(0, 50)}`);
+          }
           const startData = await startRes.json();
           if (!startData.success) throw new Error("Fallo al iniciar subida");
           
@@ -213,6 +217,15 @@ export default function PublicProfile() {
               method: 'POST',
               body: partFormData
             });
+            
+            if (!partRes.ok) {
+              const txt = await partRes.text();
+              if (partRes.status === 413 || txt.includes('Too Large')) {
+                throw new Error("Límite de Vercel (4.5MB) excedido.");
+              }
+              throw new Error(`Fallo parte ${i+1}: ${txt.substring(0, 30)}`);
+            }
+            
             const partData = await partRes.json();
             if (!partData.success) throw new Error("Fallo al subir parte " + (i + 1));
             
